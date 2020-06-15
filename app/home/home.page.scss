@@ -1,0 +1,26 @@
+#tela{
+  display: grid;
+  grid-template-columns: repeat(1, 50%);
+  grid-auto-columns: 50%;
+  height: 100%;
+  width: 100%;
+}
+#TelaEsquerda{
+  height: 100%;
+  width: 100%;
+  grid-row: 1;
+  grid-column: 1;
+}
+
+#TelaDireita{
+  height: 100%;
+  width: 100%;
+  grid-row: 1;
+  grid-column: 2;
+}
+
+.cheio{
+  height: 100%;
+  width: 100%;
+
+}
