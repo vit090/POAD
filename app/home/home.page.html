@@ -1,10 +1,39 @@
+<div class="cheio">
+    <div id="menuPause">
+        <p>Debug</p>
+        <p>
+            <!--|Jogador| X: {{this.jogador.position.x}}, Z: {{this.jogador.position.z}}-->
+        </p>
+        <p>
+            |Parada| X:{{this.parada.position.x}}, Z: {{this.parada.position.z}}
+        </p>
+        <p>
+            |Numero de Batidas| Total: {{this.nBatidas}}
+        </p>
+        <p>
+            {{this.vooando}}
+        </p>
+    </div>
 
-<div class="cheio" (pointerdown)="Freio()">
-    <div class="cheio" (pointerup)="Freio()">
-        <div id="tela">
-            <div id="TelaEsquerda"></div>
-            <div id="TelaDireita"></div>
+    <div class="contador">
+        {{atualPessoas}}
+    </div>
+    <div class="pause" (pointerdown)="Pausar()">
+        Pause
+    </div>
+    <div class="infos">
+        <div id="infosEsquerda">{{tempoShow}}</div>
+        <div id="infosDireita">{{quilometragem}}</div>
+    </div>
+    <div class="cheio" (pointerdown)="Freio()">
+        <div class="cheio" (pointerup)="Freio()">
+            <!--
+            <div id="tela">
+                <div id="TelaEsquerda"></div>
+                <div id="TelaDireita"></div>
+            </div>
+            -->
         </div>
+     
     </div>
 </div>
-
