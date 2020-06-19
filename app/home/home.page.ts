@@ -3,30 +3,33 @@ import { Component, OnInit } from '@angular/core';
 import { DeviceMotion, DeviceMotionAccelerationData } from '@ionic-native/device-motion/ngx';
 import { ScreenOrientation } from '@ionic-native/screen-orientation/ngx'
 import * as THREE from 'three';
-import { getLocaleTimeFormat } from '@angular/common';
-
+import {GLTFLoader} from 'c:/Users/basso/node_modules/three/examples/jsm/loaders/GLTFLoader'
 
 @Component({
   selector: 'app-home',
   templateUrl: 'home.page.html',
   styleUrls: ['home.page.scss'],
 })
+
 export class HomePage {
 
     constructor(private deviceMotion: DeviceMotion, private plt: Platform, private screenOrientation: ScreenOrientation) {	}
 
+    //Loader
+    private loader: GLTFLoader;
     // Tempo
     private time: Date;
-	private startTime: number;
+    private startTime: number;
     private currentTime: number;
     private lastFrameTime: number;
     private currentFrameTime: number;
+    public tempoShow: number;
     // Configurações do Mundo
-	private scene:  THREE.Scene;
-	private camera: THREE.PerspectiveCamera;
+    private scene:  THREE.Scene;
+    private camera: THREE.PerspectiveCamera;
     private renderer: THREE.WebGLRenderer;
     // Configuraçoes de Luzes
-	private a_light: THREE.AmbientLight;
+    private a_light: THREE.AmbientLight;
     private p_light: THREE.PointLight;
     // Objs
     private cube: THREE.Mesh;
@@ -37,6 +40,35 @@ export class HomePage {
     private velocidadeHorizontal: number;
     private velocidadeFrente: number;
     private freio: boolean;
+    private jogando: boolean;
+    private quilometros: number;
+    public quilometragem: number;
+    // Configurações de Passageiros
+    public pessoas;
+    public nPessoas;
+    private delayMax: number;
+    private delayMin: number;
+    // Configurações de Paradas
+    public parada: THREE.Mesh;
+    // Informações do veiculo
+    private maxPessoas: number;
+    public atualPessoas: number;
+    private areaDeColisaoX: number;
+    private nBatidas: number;
+    private vooando: boolean;
+    private iguinicao: boolean;
+    private tempIginicao: number;
+    private curvaGravidade: number;
+    // Configurações da Rampa
+    public rampa: THREE.Mesh;
+    // Teste
+    public teste1: number;
+    public teste2: number;
+    public teste3: number;
+    public teste4: number;
+
+    //PI
+    private PI: number = 3.14159265359;
 
     ngOnInit()
     {
@@ -48,18 +80,20 @@ export class HomePage {
         this.startTime = this.time.getTime();
 
         //Orientação
-        this.screenOrientation.lock(this.screenOrientation.ORIENTATIONS.LANDSCAPE);
+        //this.screenOrientation.lock(this.screenOrientation.ORIENTATIONS.LANDSCAPE);
 
         this.CreatScene();
 
         this.Update();
 
     }
-    
-    
+
     public CreatScene(): void{
         // Definição da Cena
         this.scene = new THREE.Scene();
+
+        //Loader
+        this.loader = new GLTFLoader();
 
         // Definição de Camera
         this.camera = new THREE.PerspectiveCamera( 35, window.innerWidth / window.innerHeight, 1, 1000 );
@@ -87,6 +121,33 @@ export class HomePage {
         this.velocidadeHorizontal = 1;
         this.velocidadeFrente = 50;
         this.freio = false;
+        this.jogando = true;
+        this.quilometragem = 0;
+        this.quilometros = 0;
+        
+        // Definições das pessoas
+        this.delayMax = 10;
+        this.delayMin = 2;
+        this.nPessoas = 5;
+        this.pessoas = [];
+        // Definições do veiculo
+        this.atualPessoas = 0;
+        this.areaDeColisaoX = 0.4;
+        this.nBatidas = 0;
+        this.maxPessoas = 4;
+        this.vooando = false;
+        this.iguinicao = false;
+        this.tempIginicao = 20;
+        this.curvaGravidade = 0;
+        // Definição de tempo
+        this.tempoShow = 0;
+        // Testes
+        this.teste1 = 0;
+        this.teste2 = 0;
+        this.teste3 = 0;
+        this.teste4 = 0;
+
+
 
         // Atualização do tamanha da janela
         window.addEventListener('resize',() => {
@@ -102,26 +163,25 @@ export class HomePage {
         // Calsada da direita
         this.cube = new THREE.Mesh( geometry, material );
         this.cube.position.y = -2;
-        this.cube.position.x = 5
-        this.cube.position.z = -12
+        this.cube.position.x = 5;
+        this.cube.position.z = -12;
         this.scene.add(this.cube);
 
         // Calsada da esquerda
         this.cube = new THREE.Mesh( geometry, material );
         this.cube.position.y = -2;
-        this.cube.position.x = -5
-        this.cube.position.z = -12
+        this.cube.position.x = -5;
+        this.cube.position.z = -12;
         this.scene.add(this.cube);
 
         // Rua
         material = new THREE.MeshLambertMaterial( { color: 0x80807E } );
         geometry = new THREE.BoxGeometry(10, 0.01, 40)
         this.cube = new THREE.Mesh( geometry, material );
-        this.cube.position.y = -2.5;
-        this.cube.position.x = 0
-        this.cube.position.z = -12
+        this.cube.position.y = -2.2;
+        this.cube.position.x = 0;
+        this.cube.position.z = -12;
         this.scene.add(this.cube);
-        
 
         //Caixas - Predios
         this.caixas = [];
@@ -151,23 +211,79 @@ export class HomePage {
             this.scene.add(this.caixas[i]);
         }
         
-        
+        // Pessoas
+        for(i = 0; i < this.nPessoas; i++)
+        {
+            geometry = new THREE.BoxGeometry(0.3, 0.5, 0.3);
+            material = new THREE.MeshLambertMaterial( { color: 0xf717ff } );
+            let obj = new THREE.Mesh( geometry, material );
+            obj.position.z = -0.1;
+            obj.position.y = -1.5;
+            obj.position.x = -3;
+            this.pessoas[i] = obj
+            this.scene.add(this.pessoas[i]);
+        }
 
-        
+        // Parada
+        geometry = new THREE.BoxGeometry(0.3, 0.7, 1);
+    	material = new THREE.MeshLambertMaterial( { color: 0xfffff } );
+        this.parada = new THREE.Mesh( geometry, material );
+        this.parada.position.z = -0.1;
+        this.parada.position.y = -1.5;
+        this.parada.position.x = -3.2
+        this.scene.add(this.parada);
+
+        // Rampa
+        geometry = new THREE.BoxGeometry(1, 1, 1);
+    	material = new THREE.MeshLambertMaterial( { color: 0xfffff } );
+        this.rampa = new THREE.Mesh( geometry, material );
+        this.rampa.position.z = -6;
+        this.rampa.position.y = -2.1;
+        this.rampa.rotation.x = 59;
+        this.scene.add(this.rampa);
+
         // Jogador
-    	geometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
-    	material = new THREE.MeshLambertMaterial( { color: 0xf717ff } );
-        this.jogador = new THREE.Mesh( geometry, material );
-        this.jogador.position.z = -1;
-        this.jogador.position.y = -2;
-        this.scene.add(this.jogador);
+        //CHAMANDO A FUNÇÃO QUE CARREGA O MODELO
+        this.LoadObj("../../assets/Herbie.glb", mesh =>{
+            this.jogador = mesh;
+            this.jogador.position.z = -1;
+            this.jogador.position.y = -2;
+            this.jogador.scale.set(0.3, 0.3, 0.3);
+            this.jogador.rotateY(this.PI);
+        });
+	}
+	
+    //FUNÇÃO QUE CARREGA MODELOS 
+	public LoadObj(caminho: string, callback){
 
-    }
+        //UMA MESH QUE É CRIADA
+        let mesh: THREE.Mesh;
+        //VARIÁVEL CONTENDO A CENA  
+        let scene: THREE.Scene = this.scene;
 
+        //LOADER DA THREE JS
+		this.loader.load (caminho, handle_load, 
+			function ( xhr ) {
+                console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
+            },
+			function(error) {
+				console.error( error );
+			}
+		);
+
+		function handle_load(gltf){
+            //EU USEI A getObjectById(gltf.scene.id + 2) PQ A VARIÁVEL gltf.scene
+            //NA VERDADE É UM GRUPO COM 2 COISAS DENTRO, UMA CÂMERA E A MESH DO OBJ.
+            //O ID DA MESH É SEMPRE O ID DA CENA MAIS 2
+            //(PELO MENOS EU ACHO, SE DER MERDA SEPA TEM QUE MUDAR ISSO AÍ)
+            mesh = gltf.scene.getObjectById(gltf.scene.id + 2);
+            scene.add(mesh);
+            callback(mesh);
+        }   
+
+	}
 
 	public Update(): void{
-
-        
 
 		requestAnimationFrame(() => {
 			this.Update();
@@ -176,14 +292,20 @@ export class HomePage {
 		this.renderer.render( this.scene, this.camera );
 		
 		this.plt.ready().then( ()=>{
-            this.jogador.rotation.x += 0.05;
-
-
-            this.MoverComGiroscopio();
-            this.MoverCenario();
-            this.ControleFreio();
-            //console.log(this.velocidade);
-            
+            // Funções no jogo
+            if(this.jogando)
+            {
+                //this.MoverComGiroscopio();
+                this.MoverCenario();
+                if(!this.vooando)
+                {
+                    this.ControleFreio();
+                }
+                this.MoverPessoas();
+                this.MoverParadas();
+                this.Rampa();
+                this.EstadoCarro()
+            }         
 		});
 
         this.Timer();
@@ -194,7 +316,6 @@ export class HomePage {
     }	
     
     public MoverCenario(): void{
-    
         let i;
         for(i = 0; i < 10; i++)
         {
@@ -207,8 +328,157 @@ export class HomePage {
             }
         }
 
+        this.quilometros += this.velocidadeFrente * 0.002;
+        this.quilometragem = +Number(this.quilometros).toFixed(0);
     }
 
+    // Função de paradas
+    public MoverParadas(): void
+    {
+        this.parada.position.z += this.velocidadeFrente * 0.002;
+            
+            if(this.parada.position.z >= 1)
+            {
+                let lado;
+                lado = Math.floor(Math.random() * 2);
+                if(lado == 0)
+                {
+                    this.parada.position.x = 3.2;
+                }
+                else
+                {
+                    this.parada.position.x = -3.2;
+                }
+
+                let delay = Math.floor(Math.random() * (this.delayMax - this.delayMin + 1) ) + this.delayMin;
+
+                this.parada.position.z = -30 - delay * 2;
+            }
+            if(this.ColisaoGeral(this.parada, 1.2, 0.8))
+            {
+                // Verifica se existe alguem no veiculo
+                if(this.atualPessoas != 0)
+                {
+                    // Determinar o lado que vai Spawnar
+                    let lado;
+                    lado = Math.floor(Math.random() * 2);
+                    // Determinar o delay de Spawnar
+                    let delay = Math.floor(Math.random() * (this.delayMax - this.delayMin + 1) ) + this.delayMin;
+                    this.parada.position.z = -30 - delay * 2;
+
+                    // Descarregar pessoas
+                    this.tempoShow += this.atualPessoas * 15;
+                    this.atualPessoas = 0;
+                }
+                
+            }
+
+            this.TestarColisao(this.parada, 1.2, 0.4);
+    }
+
+     // Função para mover pessoas
+    public MoverPessoas(): void
+    {
+        let i;
+        for(i = 0; i < this.nPessoas; i++)
+        {
+            this.pessoas[i].position.z += this.velocidadeFrente * 0.002;
+             
+            // Saiu fora de camera
+            if(this.pessoas[i].position.z >= 1)
+            {
+                let lado;
+                lado = Math.floor(Math.random() * 2);
+                if(lado == 0)
+                {
+                    this.pessoas[i].position.x = 3
+                }
+                else
+                {
+                    this.pessoas[i].position.x = -3
+                }
+ 
+                let delay = Math.floor(Math.random() * (this.delayMax - this.delayMin + 1) ) + this.delayMin;
+ 
+                this.pessoas[i].position.z = -30 - delay;
+            }
+ 
+             // Colisao com o passageiro
+            if(this.ColisaoGeral(this.pessoas[i], 1.2, 0.4))
+            {
+                 // Pegou o passageiro
+                if(this.atualPessoas < this.maxPessoas)
+                {
+                    let lado;
+                    lado = Math.floor(Math.random() * 2);
+                    let delay = Math.floor(Math.random() * (this.delayMax - this.delayMin + 1) ) + this.delayMin;
+                    this.pessoas[i].position.z = -30 - delay;
+     
+                    this.atualPessoas++;
+                }
+            }
+        }
+    }
+
+    // Função da Rampa
+    public Rampa(): void
+    {
+
+        if(this.rampa.position.z > 1)
+        {
+            this.rampa.position.z = -30;
+        }
+        this.rampa.position.z += this.velocidadeFrente * 0.002;
+        if(this.ColisaoGeral(this.rampa, 1, 1,))
+        {
+            this.vooando = true;
+            this.iguinicao = true;
+            this.tempIginicao = 20;
+            this.curvaGravidade = 0;
+        }
+    }
+
+    // Colisão Gereal, retorna boolean para se colidiu
+    public ColisaoGeral(objeto: THREE.Mesh, ColX: number, ColZ: number): boolean
+    {
+        if(!this.vooando)
+        {
+            if(objeto.position.z <= ColZ &&
+                objeto.position.z >= -ColZ &&
+                this.jogador.position.x + ColX >= objeto.position.x &&
+                this.jogador.position.x - ColX <= objeto.position.x)
+            {
+                this.nBatidas++;
+                return true
+            } 
+        }
+    }
+
+    // Testar Colisão, cria tabela verdade de posição
+    public TestarColisao(objeto: THREE.Mesh, ColX: number, ColZ: number): void
+    {
+        if(objeto.position.z <= ColZ)
+            this.teste1 = 1;
+        else
+            this.teste1 = 0;
+
+        if(objeto.position.z >= -ColZ)
+            this.teste2 = 1;
+        else
+            this.teste2 = 0;
+
+        if(this.jogador.position.x + ColX >= objeto.position.x)
+            this.teste3 = 1;
+        else
+            this.teste3 = 0;
+
+        if(this.jogador.position.x - ColX <= objeto.position.x)
+            this.teste4 = 1;
+        else
+            this.teste4 = 0;
+
+    }
+    
     // Função de giroscopio
     public MoverComGiroscopio(): void{
         
@@ -226,34 +496,45 @@ export class HomePage {
             if(acceleration.y > 0.5)
             {
                 NewValue = (((acceleration.y - 0.5) * NewRange) / OldRange) + 0.02;
-                if(this.jogador.position.x < 2)
+                if(this.jogador.position.x < 2.5)
                 {
                     this.jogador.position.x += this.velocidadeHorizontal * NewValue;
                 }
                 else
                 {
-                    this.jogador.position.x = 2;
+                    this.jogador.position.x = 2.5;
+                    NewValue = 0;
                 }
+                this.jogador.rotation.y = -NewValue * 10;
+                this.jogador.rotation.z = -NewValue * 5;
 			}
             else if(acceleration.y < -0.5)
             {
                 NewValue = (((acceleration.y * -1 - 0.5) * NewRange) / OldRange) + 0.02;
-                if(this.jogador.position.x > -2)
+                if(this.jogador.position.x > -2.5)
                 {
                     this.jogador.position.x -= this.velocidadeHorizontal * NewValue;
                 }
                 else
                 {
-                    this.jogador.position.x = -2;
+                    this.jogador.position.x = -2.5;
+                    NewValue = 0;
                 }
-			}
+                this.jogador.rotation.y = NewValue * 10;
+                this.jogador.rotation.z = NewValue * 5;
+            }
+            else
+            {
+                this.jogador.rotation.y = 0;
+                this.jogador.rotation.z = 0;
+            }
         });
         
         subscription.unsubscribe();
+
     }
 
-
-    public Timer(){
+    public Timer(): void{
 		//A FUNÇÃO GET TIME PEGA O TEMPO DE QUANDO O OBJ É INSTANCIADO
 		//ENTÃO TEM Q REINSTANCIAR TODO CICLO
 		this.time = new Date();
@@ -264,7 +545,7 @@ export class HomePage {
 		
     }
     
-    DeltaTime(): number{
+    public DeltaTime(): number{
         this.time = new Date();
         
         this.currentFrameTime = this.time.getTime();
@@ -273,16 +554,38 @@ export class HomePage {
         return delta;
     }
 
-    
-
-
-
-
     // Freio
     public Freio(): void
     {
         // Troca se freia ou acelera
         this.freio = !this.freio;
+    }
+
+    // Estado do carro
+    public EstadoCarro(): void
+    {
+        if(this.vooando)
+        {
+            if(this.iguinicao)
+            {
+                this.jogador.position.y += 2 * 3 * 0.02;
+                this.tempIginicao--;
+                if(this.tempIginicao <= 0)
+                {
+                    this.iguinicao = false;
+                }
+            }
+        }
+        if(this.jogador.position.y > -1.5)
+        {
+            this.jogador.position.y -=  this.curvaGravidade + 0.002;
+            this.curvaGravidade +=0.001
+        }
+        else
+        {
+            this.vooando = false;   
+        }
+        
     }
 
     public ControleFreio(): void
@@ -294,12 +597,12 @@ export class HomePage {
             {
                 // Vermelho, esta diminundo a velocidade
                 this.velocidadeFrente -= 15 * 0.02;
-                this.jogador.material = new THREE.MeshLambertMaterial( { color: 0xF70A0A } )
+                //this.jogador.material = new THREE.MeshLambertMaterial( { color: 0xF70A0A } )
             }
             else
             {
                 // Amarelo, velocidade minima
-                this.jogador.material = new THREE.MeshLambertMaterial( { color: 0xEDF104 } )
+                //this.jogador.material = new THREE.MeshLambertMaterial( { color: 0xEDF104 } )
                 this.velocidadeFrente = 5
             }
         }
@@ -310,13 +613,13 @@ export class HomePage {
             {
                 // Verde, esta tendo que acelerar
                 this.velocidadeFrente += 10 * 0.02;
-                this.jogador.material = new THREE.MeshLambertMaterial( { color: 0x40FD00 } )
+                //this.jogador.material = new THREE.MeshLambertMaterial( { color: 0x40FD00 } )
             }
             else
             {
                 // Azul, velocidade maxima
                 this.velocidadeFrente = 50;
-                this.jogador.material = new THREE.MeshLambertMaterial( { color: 0x0000FA } )
+                //this.jogador.material = new THREE.MeshLambertMaterial( { color: 0x0000FA } )
             }
         }
 
@@ -324,13 +627,31 @@ export class HomePage {
         // As vezes se deslizar o dedo pode travar e inverter o freio
         // Possiveis soluções
         // 1. Trocar para em vez de uma função de freio para duas
-        
     }
-    
 
+    //Pausa o jogo
+    public Pausar(): void
+    {
+        if(this.jogando)
+        {
+            var menuPause = document.getElementById("menuPause")
+            this.jogando = !this.jogando;
+            menuPause.style.visibility = "visible";
+            menuPause.style.pointerEvents = "all";
+        }
+        else
+        {
+            this.Continuar();
+        }
+    }
 
+    // Continua o jogo
+    public Continuar(): void
+    {
+        var menuPaus = document.getElementById("menuPause")
+        menuPaus.style.visibility = "hidden";
+        menuPaus.style.pointerEvents = "none";
+        this.jogando = true;
+    }
 }
-
-
-
 
