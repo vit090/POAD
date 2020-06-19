@@ -4,7 +4,7 @@
     <div id="menuPause">
         <p>Debug</p>
         <p>
-            |Jogador| X: {{this.jogador.position.x}}, Z: {{this.jogador.position.z}}
+            |Jogador| X: {{this.jogador.position.x}}, Z: {{this.jogador.position.z}}, Vel: {{this.VelocidadeMundo()}}
         </p>
         <p>
             |Parada| X:{{this.parada.position.x}}, Z: {{this.parada.position.z}}
@@ -13,18 +13,23 @@
             |Numero de Batidas| Total: {{this.nBatidas}}
         </p>
         <p>
-            {{this.vooando}}
+            |Tipo de Veiculo| Carro: {{this.tipoVeiculo}}, Onibus: {{!this.tipoVeiculo}}
         </p>
+
+        <button class="botaoNormi" (pointerdown)="TrocarVeiculo()">
+            Veiculo
+        </button>
     </div>
 
     <div class="contador">
         {{atualPessoas}}
     </div>
-    <div class="pause" (pointerdown)="Pausar()">
+    
+    <div class="pause" (mousedown)="Pausar()">
         Pause
     </div>
     <div class="infos">
-        <div id="infosEsquerda">{{tempoShow}}</div>
+        <div id="infosEsquerda">{{this.atualPessoas}} / {{this.maxPessoas}} | t: {{this.tf}}</div>
         <div id="infosDireita">{{quilometragem}}</div>
     </div>
     <div class="cheio" (pointerdown)="Freio()">
