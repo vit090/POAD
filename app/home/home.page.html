@@ -15,6 +15,9 @@
         <p>
             |Tipo de Veiculo| Carro: {{this.tipoVeiculo}}, Onibus: {{!this.tipoVeiculo}}
         </p>
+        <p>
+            |Timer| Tempo1: {{this.tempo1}}, Tempo2: {{this.tempo2}}, TempoShow {{this.tempoShow}}
+        </p>
 
         <button class="botaoNormi" (pointerdown)="TrocarVeiculo()">
             Veiculo
@@ -22,14 +25,14 @@
     </div>
 
     <div class="contador">
-        {{atualPessoas}}
+        {{this.tempoShow}}
     </div>
     
     <div class="pause" (mousedown)="Pausar()">
         Pause
     </div>
     <div class="infos">
-        <div id="infosEsquerda">{{this.atualPessoas}} / {{this.maxPessoas}} | t: {{this.tf}}</div>
+        <div id="infosEsquerda">{{this.atualPessoas}} / {{this.maxPessoas}} | t: {{this.currentTime}}</div>
         <div id="infosDireita">{{quilometragem}}</div>
     </div>
     <div class="cheio" (pointerdown)="Freio()">

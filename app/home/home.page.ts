@@ -23,8 +23,14 @@ export class HomePage {
     private currentTime: number;
     private lastFrameTime: number;
     private currentFrameTime: number;
-    public tempoShow: number;
     private multFrame: number;
+    // Timer
+    private tempo1: number;
+    private tempo2: number;
+    private frst: boolean;
+    private tempoAux: number;
+    private bonusTimer
+    public tempoShow: number;
     // Configurações do Mundo
 	private scene:  THREE.Scene;
 	private camera: THREE.PerspectiveCamera;
@@ -110,7 +116,6 @@ export class HomePage {
         this.CreatScene();
 
         this.Update();
-
     }
     
     
@@ -120,6 +125,14 @@ export class HomePage {
         
         // Tempo
         this.multFrame = 0.002;
+
+        // Definições do Timer
+        this.tempoShow = 20;
+        this.bonusTimer = 10;
+        this.tempo1 = 0;
+        this.tempo2 = 0;
+        this.frst = true;
+        this.tempoAux = 0;
 
         // Definição de Camera
         this.camera = new THREE.PerspectiveCamera( 35, window.innerWidth / window.innerHeight, 1, 1000 );
@@ -197,9 +210,6 @@ export class HomePage {
             this.maxPessoas = this.maxOnibus;
             this.velBase = this.velOnibus;
         }
-
-        // Definição de tempo
-        this.tempoShow = 0;
         // Testes
         this.teste1 = 0;
         this.teste2 = 0;
@@ -207,7 +217,7 @@ export class HomePage {
         this.teste4 = 0;
 
 
-
+        
         ///////////////////////////////////////////////////////////////////////////
 
         // Atualização do tamanha da janela
@@ -393,14 +403,17 @@ export class HomePage {
                 this.MoverCarrosDireita();
                 this.MoverCarrosEsquerda();
                 this.Imortal(this.tempImortal);
-            }         
+                
+            }     
+            this.DeltaTimer();
+            
 		});
 
-        this.Timer();
+        
         
         //console.log(this.DeltaTime());
-        //this.time = new Date;
-        //this.lastFrameTime = this.time.getTime();
+        this.time = new Date;
+        this.lastFrameTime = this.time.getTime();
     }	
     
 
@@ -525,7 +538,7 @@ export class HomePage {
         this.quilometragem = +Number(this.quilometros).toFixed(0);
     }
 
-    // Função de paradas
+    // Função de paradas - Move as paradas, descarregas as pessoas e adiciona tempo bonus
     public MoverParadas(): void
     {
         this.parada.position.z += this.VelocidadeMundo();
@@ -560,7 +573,7 @@ export class HomePage {
                     this.parada.position.z = -30 - delay * 2;
 
                     // Descarregar pessoas
-                    this.tempoShow += this.atualPessoas * 15;
+                    this.tempoAux += this.atualPessoas * this.bonusTimer;
                     this.atualPessoas = 0;
                 }
                 
@@ -634,8 +647,10 @@ export class HomePage {
     // Função para a imortalidade
     public Imortal(tempoFrames: number): void
     {
+        // Funciona so se tiver com o imortal ativado - Ativa quando bate em um carro
         if(this.imortal)
         {
+            // Ifs para fazer o carro piscar - troca de material a cada frame
             if(this.tf % 2 == 0)
             {
                 this.jogador.material = new THREE.MeshLambertMaterial( { color: 0xF70A0A } )
@@ -645,8 +660,9 @@ export class HomePage {
                 this.jogador.material = new THREE.MeshLambertMaterial( { color: 0xFAADFF } )
             }
 
-
+            // Diminui o numero de frames - (serve como um timer em frames)
             this.tf--;
+            // Verifica se ja acabou o timer para sair do imortal
             if(this.tf <= 0)
             {
                     this.imortal = false;
@@ -655,6 +671,7 @@ export class HomePage {
         }
         else
         {
+            // Define o tempoFrames para auxiliar tf para contar os frames/tempo
             this.tf = tempoFrames;
         }
 
@@ -701,7 +718,7 @@ export class HomePage {
 
     }
 
-    // Função de giroscopio
+    // Função de giroscopio - Move o jogador
     public MoverComGiroscopio(): void{
         
         // Variaveis para criar um "map" para suavizar os valores
@@ -774,17 +791,56 @@ export class HomePage {
         
     }
 
-    public Timer(){
-		//A FUNÇÃO GET TIME PEGA O TEMPO DE QUANDO O OBJ É INSTANCIADO
+    // Timer, n to usando até
+    public Timer()
+    {
+        //A FUNÇÃO GET TIME PEGA O TEMPO DE QUANDO O OBJ É INSTANCIADO
 		//ENTÃO TEM Q REINSTANCIAR TODO CICLO
 		this.time = new Date();
 		//CALCULA A VARIAÇÃO DE TEMPO DO INSTANTE INICIAL ATÉ AGR
 		let delta: number = (this.time.getTime() - this.startTime) / 1000;
-		//USA O toFixed(0) PRA ARREDONDAR E, JÁ QUE O RETORNO É UMA STRING, COLOCA O + NA FRENTE PRA CONVERTER PARA NUMBER
+        if(this.jogando)
+        
+        
 		this.currentTime = +Number(delta).toFixed(0);
-		
+        console.log(this.currentTime);
+
     }
-    
+
+    // Timer do jogo - descobre o deltatime e diminui de um tempo existente
+    public DeltaTimer():void
+    {
+        // Pega o tempo do frame, mas devido a logica do codigo funciona como o tempo do ultimo frame
+        this.tempo1 = this.time.getTime();
+        
+        let aux
+
+        // Subrai dois tempos pegos em momentos diferentes do jogo, não é perfeito mas funciona
+        aux = (this.tempo1 - this.tempo2) / 1000;
+
+        // Pega o tempo do ultimo frame do jogo
+        this.tempo2 = this.time.getTime();
+
+        // Se o jogo esta rolando ele calcula o tempo sem atrapalhar o delta;
+        if(this.jogando)
+        {
+            // Verifica se é o primeiro frame (frst) ou se não
+            if(!this.frst)
+            {
+                // Depois do primeiro, executa normalmente
+                this.tempoAux -= aux;
+                this.tempoShow = +Number(this.tempoAux).toFixed(0);
+            }
+            else
+            {
+                // Primeiro frame arruma uns parametros
+                this.tempoAux = this.tempoShow
+                this.frst = false;
+            }
+        }
+    }
+
+    // DelataTime, não funiciona bem e ta obsoleto, existem formas melhores
     DeltaTime(): number{
         this.time = new Date();
         
@@ -794,7 +850,7 @@ export class HomePage {
         return delta;
     }
 
-    // Estado do carro
+    // Estado do carro - Se esta voando e coisa e tal
     public EstadoCarro(): void
     {
         if(this.vooando)
@@ -821,14 +877,14 @@ export class HomePage {
         
     }
 
-    // Freio
+    // Freio - Troca o estado do freio
     public Freio(): void
     {
         // Troca se freia ou acelera
         this.freio = !this.freio;
     }
 
-    //Pausa o jogo
+    //Pausa o jogo - Pausa o jogo ou despausa se ja tiver pausado
     public Pausar(): void
     {
         if(this.jogando)
@@ -844,7 +900,7 @@ export class HomePage {
         }
     }
 
-    // Continua o jogo
+    // Continua o jogo - Pausa e esconde a tela de pause
     public Continuar(): void
     {
         var menuPaus = document.getElementById("menuPause")
@@ -899,7 +955,3 @@ export class HomePage {
 
 
 }
-
-
-
-
