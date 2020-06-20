@@ -28,11 +28,9 @@
         {{this.tempoShow}}
     </div>
     
-    <div class="pause" (mousedown)="Pausar()">
-        Pause
-    </div>
+    <div id="pause" (mousedown)="Pausar()"></div>
     <div class="infos">
-        <div id="infosEsquerda">{{this.atualPessoas}} / {{this.maxPessoas}} | t: {{this.currentTime}}</div>
+        <div id="infosEsquerda">{{this.atualPessoas}} / {{this.maxPessoas}}</div>
         <div id="infosDireita">{{quilometragem}}</div>
     </div>
     <div class="cheio" (pointerdown)="Freio()">

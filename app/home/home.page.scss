@@ -4,6 +4,7 @@
   grid-auto-columns: 50%;
   height: 100%;
   width: 100%;
+  
 }
 #TelaEsquerda{
   height: 100%;
@@ -22,35 +23,40 @@
 .cheio{
   height: 100%;
   width: 100%;
-
 }
 
 .infos{
   height: 10%;
   width: 100%;
-  background-color: blue;
+  background-image: url();
   text-align: center;
   margin: 0;
+  background: url("../assets/Borda.png") top;
+  background-size: 6%, 10%;
+  
 }
 
 .contador
 {
   width: 10%;
   height: 20%;
-  background-color: red;
   margin: 0 auto;
   left: 45%;
   position: fixed;
   font-size: xx-large;
   text-align-last: center;
   padding-top: 2.5%;
+  background: url("../assets/BotaoVazio.png");
+  background-size: 100%, 100%;
 }
 
-.pause
+#pause
 {
   width: 10%;
   height: 20%;
-  background-color: red;
+  //background-color: red;
+  background: url('../assets/BotaoPause.png');
+  background-size: 100%, 100%;
   margin: 0 auto;
   left: 90%;
   position: fixed;
@@ -66,30 +72,47 @@
   width: 100%;
   top:10%;
   position: fixed;
-  background-color: skyblue;
+  background-color: rgb(52, 56, 58);
 }
 
 #infosEsquerda
 {
   height: 8%;
   width: 20%;
-  background-color: red;
   position: fixed;
   padding-top: 0.5%;
 
-  top: 1%;
+  top: 0%;
   left: 24%;
+
+  background: url("../assets/Infos.png");
+  background-size: 19%, 20%;
+  color: rgb(63, 245, 230);
+
+  border-radius: 2px;
+  border-width: 1px;;
+  border-style: solid;
+  border-color: black;
+  
 }
 #infosDireita
 {
   height: 8%;
   width: 20%;
-  background-color: rgb(255, 0, 0);
   position: fixed;
   padding-top: 0.5%;
 
-  top: 1%;
+  top: 0%;
   left: 56%;
+
+  background: url("../assets/Infos.png");
+  background-size: 19%, 20%;
+  color: rgb(63, 245, 230);
+
+  border-radius: 2px;
+  border-width: 1px;;
+  border-style: solid;
+  border-color: black;
 }
 
 .game

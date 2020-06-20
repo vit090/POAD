@@ -887,15 +887,18 @@ export class HomePage {
     //Pausa o jogo - Pausa o jogo ou despausa se ja tiver pausado
     public Pausar(): void
     {
+        let botaoPause = document.getElementById("pause")
         if(this.jogando)
         {
             var menuPause = document.getElementById("menuPause")
             this.jogando = !this.jogando;
             menuPause.style.visibility = "visible";
             menuPause.style.pointerEvents = "all";
+            //botaoPause.style.background = "url('../assets/BotaoPause.png')"
         }
         else
         {
+            //botaoPause.style.backgroundImage = "url('../assets/BotaoPlay.png')";
             this.Continuar();
         }
     }
