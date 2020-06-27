@@ -6,7 +6,6 @@ import * as THREE from 'three';
 import {GLTFLoader} from 'c:/Users/basso/node_modules/three/examples/jsm/loaders/GLTFLoader';
 import { ConfigsService } from './../services/configs.service';
 
-
 @Component({
   selector: 'app-home',
   templateUrl: 'home.page.html',
@@ -17,10 +16,14 @@ export class HomePage {
     constructor(private deviceMotion: DeviceMotion, 
         private plt: Platform, 
         private screenOrientation: ScreenOrientation,
-         public configs: ConfigsService) {	}
+        public configs: ConfigsService) 
+    {}
 
+    //#region Variáveis
     //Loader
     private loader: GLTFLoader;
+    private audioLoader: THREE.AudioLoader;
+
     // Tempo
     private time: Date;
 	private startTime: number;
@@ -37,7 +40,8 @@ export class HomePage {
     public tempoShow: number;
     // Configurações do Mundo
 	private scene:  THREE.Scene;
-	private camera: THREE.PerspectiveCamera;
+    private camera: THREE.PerspectiveCamera;
+    private listener: THREE.AudioListener;
     private renderer: THREE.WebGLRenderer;
     // Configuraçoes de Luzes
 	private a_light: THREE.AmbientLight;
@@ -75,7 +79,6 @@ export class HomePage {
     private curvaGravidade: number;
     private velBase: number;
     public velocidadeDoJogador: number;
-    //public tipoVeiculo: boolean; // True = Carro || False = Onibus \\
     // Imortalidade
     public imortal: boolean;
     private tempImortal: number;
@@ -112,10 +115,14 @@ export class HomePage {
 	public carregouPessoas: boolean = false;
 	public carregouParadas: boolean = false;
 	public carregouRampas: boolean = false;
-	public carregouCarros: boolean = false;
+    public carregouCarros: boolean = false;
+    public carregouMusica: boolean = false;
     // Para angulos
     private PI: number = 3.14159265359;
     private angulo: number = this.PI/180;
+    //Musica Top
+    private topGear: THREE.Audio;
+    //#endregion
 
     ngOnInit()
     {
@@ -136,13 +143,13 @@ export class HomePage {
         console.log("IsCar: " + this.configs.isCar);
     }
     
-    
     public CreatScene(): void{
         // Definição da Cena
         this.scene = new THREE.Scene();
         
         //Loader
         this.loader = new GLTFLoader();
+        this.audioLoader = new THREE.AudioLoader();
 
         // Tempo
         this.multFrame = 0.002;
@@ -160,7 +167,8 @@ export class HomePage {
         this.camera.position.z = 5.5;
         this.camera.position.y = 4;
         this.camera.lookAt(0, 2, 0.5);
-        
+        this.listener = new THREE.AudioListener();
+        this.camera.add(this.listener);
         // Definições de Renderer
 		this.renderer = new THREE.WebGLRenderer({ antialias: true});
 		this.renderer.setSize( window.innerWidth, window.innerHeight );
@@ -485,9 +493,14 @@ export class HomePage {
             }
 
 			this.carregouJogador = true;
-		});
+        });
         
-
+        this.LoadAudio("../../assets/audio/TopGear.mp3", sound => {
+            this.topGear = sound;
+            this.topGear.setLoop(true);
+            this.topGear.play();
+            this.carregouMusica = true;
+        })
     }
 
      //FUNÇÃO QUE CARREGA MODELOS 
@@ -521,6 +534,18 @@ export class HomePage {
 
 	}
 
+    public LoadAudio(caminho: string, callback){
+
+        let sound = new THREE.Audio( this.listener );
+
+        this.audioLoader.load(caminho, handle_load);
+
+        function handle_load( buffer ){
+            sound.setBuffer( buffer );
+            callback(sound);
+        }
+    }
+
     // Função de upadate do jogo
 	public Update(): void{
 
@@ -537,6 +562,7 @@ export class HomePage {
                 this.carregouPessoas == true && 
                 this.carregouParadas == true && 
                 this.carregouRampas == true &&
+                this.carregouMusica == true &&
                 this.frst == true
             )
             {   
@@ -1249,6 +1275,4 @@ export class HomePage {
             infoEsq.style.visibility = "hidden";
         }
     }
-
-
 }
