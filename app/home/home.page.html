@@ -4,10 +4,10 @@
     <div id="menuPause">
         <p>Debug</p>
         <p>
-            |Jogador| X: {{this.jogador.position.x}}, Z: {{this.jogador.position.z}}, Vel: {{this.VelocidadeMundo()}}
+           <!-- |Jogador| X: {{this.jogador.position.x}}, Z: {{this.jogador.position.z}}, Vel: {{this.VelocidadeMundo()}}-->
         </p>
         <p>
-            |Parada| X:{{this.parada.position.x}}, Z: {{this.parada.position.z}}
+            |Pessoas| Rot:{{this.teste1}}
         </p>
         <p>
             |Numero de Batidas| Total: {{this.nBatidas}}
@@ -28,11 +28,32 @@
         {{this.tempoShow}}
     </div>
     
-    <div id="pause" (mousedown)="Pausar()"></div>
+
+    <div id="pause" (pointerdown)="Pausar()"></div>
+
+    <div id="telaLoading">
+        <div id=logo></div>
+    </div>
+
+    <div id="fimDeJogo">
+        <p> </p>
+        <h1>Fim De Jogo</h1>
+        <p>(Tempo Esgotado)</p>
+        <p>
+            |Pessoas e Batidas|
+        </p>
+        <p>
+            Entregues: {{this.nPessoasEntregues}} | Perdidas: {{this.nPessoasPerdidas}} | Batidas: {{this.nBatidas}}
+        </p>
+        <div class="botaoAnormi" (pointerdown)="Reniciar()"></div>
+        
+    </div>
+
     <div class="infos">
         <div id="infosEsquerda">{{this.atualPessoas}} / {{this.maxPessoas}}</div>
         <div id="infosDireita">{{quilometragem}}</div>
     </div>
+    
     <div class="cheio" (pointerdown)="Freio()">
         <div class="cheio" (pointerup)="Freio()">
             <!--
@@ -44,10 +65,6 @@
         </div>
      
     </div>
-
-    
-
-
 
 
 </div>

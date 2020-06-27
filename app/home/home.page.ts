@@ -7,6 +7,9 @@ import { getLocaleTimeFormat } from '@angular/common';
 import { typeWithParameters } from '@angular/compiler/src/render3/util';
 import { VirtualTimeScheduler } from 'rxjs';
 import { createGesture, Gesture } from '@ionic/core';
+import {GLTFLoader} from 'c:/Users/edu06/node_modules/three/examples/jsm/loaders/GLTFLoader'
+//import { runInThisContext } from 'vm';
+
 
 @Component({
   selector: 'app-home',
@@ -17,6 +20,8 @@ export class HomePage {
 
     constructor(private deviceMotion: DeviceMotion, private plt: Platform, private screenOrientation: ScreenOrientation) {	}
 
+    //Loader
+    private loader: GLTFLoader;
     // Tempo
     private time: Date;
 	private startTime: number;
@@ -41,7 +46,7 @@ export class HomePage {
     // Objs
     private cube: THREE.Mesh;
     private jogador: THREE.Mesh;
-    private caixas;
+    private predios;
     // Configurações de Jogo
     private gameMode: boolean;
     private velocidadeHorizontal: number;
@@ -51,6 +56,9 @@ export class HomePage {
     private quilometros: number;
     public quilometragem: number;
     // Configurações de Passageiros
+    public nPessoasEntregues: number;
+    public nPessoasPerdidas: number;
+    public inverter;
     public pessoas;
     public nPessoas;
     private delayMax: number;
@@ -67,6 +75,7 @@ export class HomePage {
     private tempIginicao: number;
     private curvaGravidade: number;
     private velBase: number;
+    public velocidadeDoJogador: number;
     public tipoVeiculo: boolean; // True = Carro || False = Onibus \\
     // Imortalidade
     public imortal: boolean;
@@ -78,6 +87,10 @@ export class HomePage {
     private maxCarro: number;
     private maxOnibus: number;
     // Outros Carros na Rua
+    private carsIgini;
+    private carsVooando;
+    private carsTempIgini;
+    private carsCruGravi;
     private carrosDireita;
     private carrosEsquerda;
     private carrosDelayMax: number;
@@ -87,17 +100,23 @@ export class HomePage {
     private velCarrosDireita: number;
     private velCarrosEsquerda: number;
     private posLugares;
-
     // Configurações da Rampa
     public rampa: THREE.Mesh;
     // Teste
     public teste1: number;
     public teste2: number;
     public teste3: number;
-    public teste4: number;
-    
-
-
+    public teste4: number;    
+    // Variaveis de carregamento 
+	public carregouJogador: boolean = false;
+	public carregouPredios: boolean = false;
+	public carregouPessoas: boolean = false;
+	public carregouParadas: boolean = false;
+	public carregouRampas: boolean = false;
+	public carregouCarros: boolean = false;
+    // Para angulos
+    private PI: number = 3.14159265359;
+    private angulo: number = this.PI/180;
 
     ngOnInit()
     {
@@ -123,11 +142,14 @@ export class HomePage {
         // Definição da Cena
         this.scene = new THREE.Scene();
         
+        //Loader
+        this.loader = new GLTFLoader();
+
         // Tempo
         this.multFrame = 0.002;
 
         // Definições do Timer
-        this.tempoShow = 20;
+        this.tempoShow = 30;
         this.bonusTimer = 10;
         this.tempo1 = 0;
         this.tempo2 = 0;
@@ -136,9 +158,9 @@ export class HomePage {
 
         // Definição de Camera
         this.camera = new THREE.PerspectiveCamera( 35, window.innerWidth / window.innerHeight, 1, 1000 );
-        this.camera.position.z = 5;
-        this.camera.position.y = 2;
-        this.camera.lookAt(0, 0, 0);
+        this.camera.position.z = 5.5;
+        this.camera.position.y = 4;
+        this.camera.lookAt(0, 2, 0.5);
         
         // Definições de Renderer
 		this.renderer = new THREE.WebGLRenderer({ antialias: true});
@@ -160,15 +182,19 @@ export class HomePage {
         this.velocidadeHorizontal = 1;
         this.velocidadeFrente = 50;
         this.freio = false;
-        this.jogando = true;
+        this.jogando = false;
         this.quilometragem = 0;
         this.quilometros = 0;
         
         // Definições das pessoas
-        this.delayMax = 10;
-        this.delayMin = 2;
-        this.nPessoas = 5;
+        this.nPessoasPerdidas = 0;
+        this.nPessoasEntregues = 0;
+        this.inverter = [];
+        this.delayMax = 20;
+        this.delayMin = 5;
+        this.nPessoas = 8;
         this.pessoas = [];
+
 
         // Definições do veiculo
         this.atualPessoas = 0;
@@ -179,6 +205,7 @@ export class HomePage {
         this.iguinicao = false;
         this.tempIginicao = 20;
         this.curvaGravidade = 0;
+        this.velocidadeDoJogador = 0;
         
         // Imortalidade
         this.imortal = false;
@@ -233,15 +260,15 @@ export class HomePage {
         
         // Calsada da direita
         this.cube = new THREE.Mesh( geometry, material );
-        this.cube.position.y = -2;
-        this.cube.position.x = 5;
+        this.cube.position.y = 0;
+        this.cube.position.x = 4.7;
         this.cube.position.z = -12;
         this.scene.add(this.cube);
 
         // Calsada da esquerda
         this.cube = new THREE.Mesh( geometry, material );
-        this.cube.position.y = -2;
-        this.cube.position.x = -5;
+        this.cube.position.y = 0;
+        this.cube.position.x = -4.7;
         this.cube.position.z = -12;
         this.scene.add(this.cube);
 
@@ -249,59 +276,91 @@ export class HomePage {
         material = new THREE.MeshLambertMaterial( { color: 0x80807E } );
         geometry = new THREE.BoxGeometry(10, 0.01, 40)
         this.cube = new THREE.Mesh( geometry, material );
-        this.cube.position.y = -2.2;
+        this.cube.position.y = 0;
         this.cube.position.x = 0;
         this.cube.position.z = -12;
         this.scene.add(this.cube);
 
         //Caixas - Predios
-        this.caixas = [];
-        let i;
+        this.predios = [];
         // Predios da direita
-        for(i = 0; i<5; i++)
+        for(let i:number = 0; i<10; i++)
         {
-            let geometry = new THREE.BoxGeometry(2, 3, 4);
-            let material = new THREE.MeshLambertMaterial( { color: 0x46484C } );
-            let obj = new THREE.Mesh( geometry, material );
-            obj.position.x = -4.5;
-            obj.position.y = 0;
-            obj.position.z = -i * 4 * 1.5;
-            this.caixas[i] = obj;
-            this.scene.add(this.caixas[i]);
+            let tipo = Math.floor(Math.random() * 5 + 1);
+            let obj:THREE.Mesh;
+			this.LoadObj("../../assets/Predio_Antigo_" + tipo + ".glb", mesh =>{
+				obj = mesh;
+				obj.position.x = -5;
+				obj.position.z = -i * 1.65* 1.5;
+				obj.rotation.y = this.PI/2;
+				this.predios[i] = obj;
+				this.scene.add(this.predios[i]);
+			});
         }
-        // Predios da esquerda
-        for(i = 5; i< 10; i++)
+
+        // Predios da esquerda 
+        for(let k:number = 10; k < 20; k++)
         {
-            let geometry = new THREE.BoxGeometry(2, 3, 4);
-            let material = new THREE.MeshLambertMaterial( { color: 0x46484C } );
-            let obj = new THREE.Mesh( geometry, material );
-            obj.position.x = 4.5;
-            obj.position.y = 0;
-            obj.position.z = (-i * 4 * 1.5 ) + 30;
-            this.caixas[i] = obj;
-            this.scene.add(this.caixas[i]);
+            let tipo = Math.floor(Math.random() * 5 + 1);
+            let obj:THREE.Mesh;
+			this.LoadObj("../../assets/Predio_Antigo_" + tipo + ".glb", mesh =>{
+				obj = mesh;
+				obj.position.x = 5;
+				obj.position.z = (-k * 1.65 * 1.5 ) + 22;
+				obj.rotation.y = -this.PI/2;
+				this.predios[k] = obj;
+				this.scene.add(this.predios[k]);	
+				if(k == 19)
+				{
+					this.carregouPredios = true;
+				}
+			});
         }
         
         // Pessoas
-        for(i = 0; i < this.nPessoas; i++)
+        for(let i:number = 0; i < this.nPessoas; i++)
         {
-            geometry = new THREE.BoxGeometry(0.3, 0.5, 0.3);
-            material = new THREE.MeshLambertMaterial( { color: 0xf717ff } );
-            let obj = new THREE.Mesh( geometry, material );
-            obj.position.z = -0.1;
-            obj.position.y = -1.5;
-            obj.position.x = -3;
-            this.pessoas[i] = obj
-            this.scene.add(this.pessoas[i]);
-        }
+            let t = Math.floor(Math.random() * 2 + 1);
+            let estado
+            if (t == 1)
+            {
+                estado = true;
+            }
+            else
+            {
+                estado = false;
+            }
+            let tipo = Math.floor(Math.random() * 4 + 1);
+            let obj :THREE.Mesh;
+			this.LoadObj("../../assets/Generico_" + tipo + ".glb", mesh =>{
+                //this.inverter[i] = estado;
+                obj = mesh;
+                if(estado)
+                    obj.rotation.z = 0.2;
+                else
+                    obj.rotation.z = -0.2;
+				obj.position.z = -0.1;
+				obj.position.y = 0;
+				obj.position.x = -3;
+				this.pessoas[i] = obj
+				obj.scale.set(0.1,0.1,0.1);
+				this.scene.add(this.pessoas[i]);
+				if(i == this.nPessoas-1){
+					this.carregouPessoas = true;
+				}
+			})
+		}
 
         // Outros Carros na Rua
         this.carrosDireita = [];
         this.carrosEsquerda = [];
+        this.carsIgini = [];
+        this.carsVooando = [];
+        this.carsTempIgini = [];
+        this.carsCruGravi = [];
 
         // Carros da Direita
-        let j;
-        for(j = 0; j < this.nCarrosDireita; j++)
+        for(let j:number = 0; j < this.nCarrosDireita; j++)
         {
             let pos = Math.floor(Math.random() * 2);
             if (pos == 1)
@@ -312,18 +371,29 @@ export class HomePage {
             {
                 pos = this.posLugares[3];
             }
-            let geometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
-            let material = new THREE.MeshLambertMaterial( { color: 0x7322AB } );
-            let obj = new THREE.Mesh( geometry, material );
-            obj.position.x = pos;
-            obj.position.y = -1.5;
-            obj.position.z = -(j + 5) * 4 * 1.5; 
-            this.carrosDireita[j] = obj;
-            this.scene.add(this.carrosDireita[j]);
+            let obj:THREE.Mesh;
+
+            let tipo = Math.floor(Math.random() * 3 + 1);
+
+            this.carsVooando[j] = false;
+            this.carsIgini[j] = false;
+            this.carsTempIgini[j] = 20;
+            this.carsCruGravi[j] = 0;
+
+			this.LoadObj("../../assets/Carro_" + tipo + ".glb", mesh =>{
+			obj = mesh;
+			obj.position.x = pos;
+            obj.position.z = -j * 4 * 1.5;
+            obj.rotation.y = this.angulo * 180;
+			this.carrosDireita[j] = obj;
+			obj.scale.set(0.2, 0.2, 0.15);
+			this.scene.add(this.carrosDireita[j]);
+
+         });
         }
 
-        // Carros da Direita
-        for(j = 0; j < this.nCarrosEsquerda; j++)
+        // Carros da Esquerda
+        for(let j:number = 0; j < this.nCarrosEsquerda; j++)
         {
             let pos = Math.floor(Math.random() * 2);
             if (pos == 1)
@@ -334,50 +404,126 @@ export class HomePage {
             {
                 pos = this.posLugares[0];
             }
-            let geometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
-            let material = new THREE.MeshLambertMaterial( { color: 0x7322AB } );
-            let obj = new THREE.Mesh( geometry, material );
+            let obj:THREE.Mesh;
+
+            this.carsVooando[j + this.nCarrosEsquerda] = false;
+            this.carsIgini[j + this.nCarrosEsquerda] = false;
+            this.carsTempIgini[j + this.nCarrosEsquerda] = 20;
+            this.carsCruGravi[j + this.nCarrosEsquerda] = 0;
+
+            let tipo = Math.floor(Math.random() * 3 + 1);
+
+			this.LoadObj("../../assets/Carro_" + tipo + ".glb", mesh =>{
+            obj = mesh;
             obj.position.x = pos;
-            obj.position.y = -1.5;
-            obj.position.z = -(j + 5) * 4 * 1.5; 
-            this.carrosEsquerda[j] = obj;
+            obj.position.z = -j * 4 * 1.5;
+			this.carrosEsquerda[j] = obj;
+			obj.scale.set(0.2, 0.2, 0.15);
             this.scene.add(this.carrosEsquerda[j]);
+            if(j == this.nCarrosEsquerda-1){
+				this.carregouCarros = true;
+			}
+         });
         }
         
-
         // Parada
-        geometry = new THREE.BoxGeometry(0.3, 0.7, 1);
-    	material = new THREE.MeshLambertMaterial( { color: 0xfffff } );
-        this.parada = new THREE.Mesh( geometry, material );
-        this.parada.position.z = -0.1;
-        this.parada.position.y = -1.5;
-        this.parada.position.x = -3.2
-        this.scene.add(this.parada);
+        let parada:THREE.Mesh;
+        this.LoadObj("../../assets/Ponto.glb", mesh =>{
+            this.parada = mesh;
+            this.parada.position.z = -0.1;
+            this.parada.position.y = 0;
+            this.parada.position.x = -3.2
+            this.parada.rotation.y = this.PI/2;
+            this.parada.scale.set(0.15, 0.15,0.15);
+            this.scene.add(this.parada)
+            this.carregouParadas = true;
+        });
 
         // Rampa
-        geometry = new THREE.BoxGeometry(1, 1, 1);
-    	material = new THREE.MeshLambertMaterial( { color: 0xfffff } );
-        this.rampa = new THREE.Mesh( geometry, material );
-        this.rampa.position.z = -6;
-        this.rampa.position.y = -2.1;
-        this.rampa.rotation.x = 59;
-        this.scene.add(this.rampa);
+        let rampa:THREE.Mesh;
+        this.LoadObj("../../assets/Rampa.glb", mesh =>{
+            this.rampa = mesh;
+            this.rampa.position.z = -6;
+            this.rampa.position.y = 0;
+            this.rampa.scale.set(0.3, 0.3, 0.3);
+            this.scene.add(this.rampa);
+            this.carregouRampas = true;
+        });
+
 
         // Jogador
-    	geometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
-    	material = new THREE.MeshLambertMaterial( { color: 0xf717ff } );
-        this.jogador = new THREE.Mesh( geometry, material );
-        this.jogador.position.z = -0.1;
-        this.jogador.position.y = -1.5;
-        this.scene.add(this.jogador);
+        let veiuculoDoJogador = "Carro";
+        let skinDoVeiculo = 1;
+
+        if(this.tipoVeiculo)
+        {
+            veiuculoDoJogador = "Carro" // Define o tipo do veiculo como Carro
+        }
+        else
+        {
+            veiuculoDoJogador = "Onibus" // Define o tipo do veiculo como Onibus
+        }
+
+        this.LoadObj("../../assets/" + veiuculoDoJogador +"_" + skinDoVeiculo + ".glb", mesh =>{
+            this.jogador = mesh;
+            this.jogador.position.z = -0.1;
+            this.jogador.position.y = 0;
+            
+            this.jogador.scale.set(0.2, 0.2, 0.2);
+            this.jogador.rotation.y = this.angulo * 180;
+			//this.jogador.rotateY(this.PI);
+			this.jogador.castShadow= true;
+            this.jogador.receiveShadow= true;
+            this.scene.add(this.jogador);
+
+            if(this.tipoVeiculo)
+            {
+                this.jogador.scale.set(0.2, 0.2, 0.15);
+            }
+            else
+            {
+                this.jogador.scale.set(0.2, 0.2, 0.1);
+            }
+
+			this.carregouJogador = true;
+		});
         
 
     }
 
+     //FUNÇÃO QUE CARREGA MODELOS 
+	public LoadObj(caminho: string, callback){
 
+        //UMA MESH QUE É CRIADA
+        let mesh: THREE.Mesh;
+        //VARIÁVEL CONTENDO A CENA  
+        let scene: THREE.Scene = this.scene;
+
+        //LOADER DA THREE JS
+		this.loader.load (caminho, handle_load, 
+			function ( xhr ) {
+                console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
+            },
+			function(error) {
+				console.error( error );
+			}
+		);
+
+		function handle_load(gltf){
+            //EU USEI A getObjectById(gltf.scene.id + 2) PQ A VARIÁVEL gltf.scene
+            //NA VERDADE É UM GRUPO COM 2 COISAS DENTRO, UMA CÂMERA E A MESH DO OBJ.
+            //O ID DA MESH É SEMPRE O ID DA CENA MAIS 2
+            //(PELO MENOS EU ACHO, SE DER MERDA SEPA TEM QUE MUDAR ISSO AÍ)
+			mesh = gltf.scene;
+            scene.add(mesh);
+			callback(mesh);
+			
+        }   
+
+	}
+
+    // Função de upadate do jogo
 	public Update(): void{
-
-        
 
 		requestAnimationFrame(() => {
 			this.Update();
@@ -387,23 +533,35 @@ export class HomePage {
 		
 		this.plt.ready().then( ()=>{
             // Funções no jogo
+            if(this.carregouPredios == true && 
+                this.carregouCarros == true && 
+                this.carregouPessoas == true && 
+                this.carregouParadas == true && 
+                this.carregouRampas == true &&
+                this.frst == true
+            )
+            {   
+                this.Loading();
+                this.jogando = true;
+            }
+
             if(this.jogando)
             {
                 //this.jogador.rotation.x += 0.05;
                 this.MoverComGiroscopio();
-                this.MoverCenario();
                 if(!this.vooando)
                 {
                     this.ControleFreio();
                 }
+                this.MoverCenario();
                 this.MoverPessoas();
                 this.MoverParadas();
-                //this.Rampa();
+                this.Rampa();
                 this.EstadoCarro();
                 this.MoverCarrosDireita();
                 this.MoverCarrosEsquerda();
-                this.Imortal(this.tempImortal);
-                
+                this.Imortal(this.tempImortal); 
+                this.FimDeJogo();
             }     
             this.DeltaTimer();
             
@@ -412,10 +570,9 @@ export class HomePage {
         
         
         //console.log(this.DeltaTime());
-        this.time = new Date;
+        this.time = new Date;//
         this.lastFrameTime = this.time.getTime();
-    }	
-    
+    }
 
     // Função que retorna velocidade do mundo - Ou seja a velociade do Veiculo/Jogador
     public VelocidadeMundo(): number
@@ -457,19 +614,31 @@ export class HomePage {
             }
             
             // Verifica colisão, se bater perde pessoas
-            if(this.ColisaoGeral(this.carrosDireita[i], 0.5, 0.5) && this.imortal == false)
+            if(this.ColisaoGeral(this.carrosDireita[i], 0.6, 1) && this.imortal == false)
             {
                 // Verifica se existe alguem no veiculo
                 if(this.atualPessoas != 0)
                 {
                     // Perder pessoas
                     this.atualPessoas--;
+                    this.nPessoasPerdidas++;
                 }
                 this.carrosDireita[i].position.x = pos;
                 this.carrosDireita[i].position.z = -20 - delay;
                 this.nBatidas++;
                 this.imortal = true;
             }
+
+            if(this.ColisaoUmComOutro(this.carrosDireita[i], this.rampa, i, 0.8, 0.8))
+            {
+                this.carsVooando = true;
+                this.carsIgini = true;
+                this.carsTempIgini = 20;
+                this.carsCruGravi = 0;
+            }
+
+            //this.EstadoCars(this.carrosDireita[i], i);
+            
         }
     }
 
@@ -503,13 +672,14 @@ export class HomePage {
             }
             
             // Verifica colisão, se bater perde pessoas
-            if(this.ColisaoGeral(this.carrosEsquerda[i], 0.5, 0.5) && this.imortal == false)
+            if(this.ColisaoGeral(this.carrosEsquerda[i], 0.6, 1) && this.imortal == false)
             {
                 // Verifica se existe alguem no veiculo
                 if(this.atualPessoas != 0)
                 {
                     // Perder pessoas
                     this.atualPessoas--;
+                    this.nPessoasPerdidas++;
                 }
                 this.carrosEsquerda[i].position.x = pos;
                 this.carrosEsquerda[i].position.z = -20 - delay;
@@ -523,14 +693,14 @@ export class HomePage {
     public MoverCenario(): void{
     
         let i;
-        for(i = 0; i < 10; i++)
+        for(i = 0; i < 20; i++)
         {
 
-            this.caixas[i].position.z += this.VelocidadeMundo();
+            this.predios[i].position.z += this.VelocidadeMundo();
 
-            if(this.caixas[i].position.z >= 2.5)
+            if(this.predios[i].position.z >= 2.5)
             {
-                this.caixas[i].position.z = -21.5;
+                this.predios[i].position.z = -21.5;
             }
         }
 
@@ -543,43 +713,42 @@ export class HomePage {
     {
         this.parada.position.z += this.VelocidadeMundo();
             
-            if(this.parada.position.z >= 1)
+        if(this.parada.position.z >= 1)
+        {
+            let lado;
+            lado = Math.floor(Math.random() * 2);
+            if(lado == 0)
             {
+                this.parada.position.x = 3.2;
+                this.parada.rotation.y = this.PI/2;
+            }
+            else
+            {
+                this.parada.position.x = -3.2;
+                this.parada.rotation.y = this.angulo * -90;
+            }
+            let delay = Math.floor(Math.random() * (this.delayMax - this.delayMin + 1) ) + this.delayMin;
+
+            this.parada.position.z = -30 - delay * 2;
+        }
+        if(this.ColisaoGeral(this.parada, 1.2, 0.8))
+        {
+            // Verifica se existe alguem no veiculo
+            if(this.atualPessoas != 0)
+            {
+                // Determinar o lado que vai Spawnar
                 let lado;
                 lado = Math.floor(Math.random() * 2);
-                if(lado == 0)
-                {
-                    this.parada.position.x = 3.2;
-                }
-                else
-                {
-                    this.parada.position.x = -3.2;
-                }
-
+                // Determinar o delay de Spawnar
                 let delay = Math.floor(Math.random() * (this.delayMax - this.delayMin + 1) ) + this.delayMin;
-
                 this.parada.position.z = -30 - delay * 2;
-            }
-            if(this.ColisaoGeral(this.parada, 1.2, 0.8))
-            {
-                // Verifica se existe alguem no veiculo
-                if(this.atualPessoas != 0)
-                {
-                    // Determinar o lado que vai Spawnar
-                    let lado;
-                    lado = Math.floor(Math.random() * 2);
-                    // Determinar o delay de Spawnar
-                    let delay = Math.floor(Math.random() * (this.delayMax - this.delayMin + 1) ) + this.delayMin;
-                    this.parada.position.z = -30 - delay * 2;
 
-                    // Descarregar pessoas
-                    this.tempoAux += this.atualPessoas * this.bonusTimer;
-                    this.atualPessoas = 0;
-                }
-                
-            }
-
-            this.TestarColisao(this.parada, 1.2, 0.4);
+                // Descarregar pessoas
+                this.nPessoasEntregues += this.atualPessoas;
+                this.tempoAux += this.atualPessoas * this.bonusTimer;
+                this.atualPessoas = 0;
+            }      
+        }
     }
 
     // Função para mover pessoas
@@ -597,11 +766,11 @@ export class HomePage {
                 lado = Math.floor(Math.random() * 2);
                 if(lado == 0)
                 {
-                    this.pessoas[i].position.x = 3
+                    this.pessoas[i].position.x = 3;
                 }
                 else
                 {
-                    this.pessoas[i].position.x = -3
+                    this.pessoas[i].position.x = -3;
                 }
 
                 let delay = Math.floor(Math.random() * (this.delayMax - this.delayMin + 1) ) + this.delayMin;
@@ -623,7 +792,32 @@ export class HomePage {
                     this.atualPessoas++;
                 }
             }
+            this.AnimarPessoas(i);
         }
+    }
+
+    // Função para animar eles
+    public AnimarPessoas(nPes: number): void
+    {
+        if(!this.inverter[nPes])
+        {
+            this.pessoas[nPes].rotation.z += 0.03;
+        }
+        else
+        {
+            this.pessoas[nPes].rotation.z -= 0.03;
+        }
+
+        if(this.pessoas[nPes].rotation.z >= 0.2)
+        {
+            this.pessoas[nPes].rotation.z = 0.2;
+            this.inverter[nPes] = true;
+        }
+        else if(this.pessoas[nPes].rotation.z <= -0.2)
+        {
+            this.pessoas[nPes].rotation.z = -0.2;
+            this.inverter[nPes] = false;
+        } 
     }
 
     // Função da Rampa
@@ -632,8 +826,12 @@ export class HomePage {
 
         if(this.rampa.position.z > 1)
         {
-            this.rampa.position.z = -30;
+            let delay = Math.floor(Math.random() * (this.delayMax - this.delayMin + 1) ) + this.delayMin;
+
+            this.rampa.position.z = -30 - delay;
         }
+        //this.rampa.position.z = -3;
+        //this.rampa.position.x = 2.5;
         this.rampa.position.z += this.VelocidadeMundo();
         if(this.ColisaoGeral(this.rampa, 1, 1,))
         {
@@ -659,6 +857,8 @@ export class HomePage {
             {
                 this.jogador.material = new THREE.MeshLambertMaterial( { color: 0xFAADFF } )
             }
+
+            this.jogador.rotation.y += 0.15
 
             // Diminui o numero de frames - (serve como um timer em frames)
             this.tf--;
@@ -692,6 +892,22 @@ export class HomePage {
             } 
         }
     }
+
+    public ColisaoUmComOutro(Voce: THREE.Mesh, Outro: THREE.Mesh, nCars: number, ColX: number, ColZ: number): boolean
+    {
+        if(!this.carsVooando[nCars])
+        {
+            if(Voce.position.z <= Outro.position.z + ColZ &&
+                Voce.position.z >= Outro.position.z - ColZ &&
+                Outro.position.x + ColX >= Voce.position.x &&
+                Outro.position.x - ColX <= Voce.position.x)
+            {
+                return true
+            } 
+        }
+    }
+
+
     
     // Testar Colisão, cria tabela verdade de posição - Função para Debug
     public TestarColisao(objeto: THREE.Mesh, ColX: number, ColZ: number): void
@@ -744,8 +960,11 @@ export class HomePage {
                     this.jogador.position.x = 2.5;
                     NewValue = 0;
                 }
-                this.jogador.rotation.y = -NewValue * 10;
-                this.jogador.rotation.z = -NewValue * 5;
+                if(!this.imortal)
+                {
+                    this.jogador.rotation.y = - this.angulo * 180 - NewValue * 10;
+                    this.jogador.rotation.z = NewValue * 5;
+                }
 			}
             else if(acceleration.y < -0.5)
             {
@@ -759,13 +978,19 @@ export class HomePage {
                     this.jogador.position.x = -2.5;
                     NewValue = 0;
                 }
-                this.jogador.rotation.y = NewValue * 10;
-                this.jogador.rotation.z = NewValue * 5;
+                if(!this.imortal)
+                {
+                    this.jogador.rotation.y = this.angulo * 180 + NewValue * 10;
+                    this.jogador.rotation.z = -NewValue * 5;
+                }
             }
             else
             {
-                this.jogador.rotation.y = 0;
-                this.jogador.rotation.z = 0;
+                if(!this.imortal)
+                {
+                    this.jogador.rotation.y = this.angulo * 180;
+                    this.jogador.rotation.z = 0;
+                }
             }
         });
         
@@ -841,7 +1066,7 @@ export class HomePage {
     }
 
     // DelataTime, não funiciona bem e ta obsoleto, existem formas melhores
-    DeltaTime(): number{
+    public DeltaTime(): number{
         this.time = new Date();
         
         this.currentFrameTime = this.time.getTime();
@@ -859,13 +1084,15 @@ export class HomePage {
             {
                 this.jogador.position.y += 2 * 3 * 0.02;
                 this.tempIginicao--;
+                
                 if(this.tempIginicao <= 0)
                 {
                     this.iguinicao = false;
                 }
             }
+            this.jogador.rotation.x += 0.1
         }
-        if(this.jogador.position.y > -1.5)
+        if(this.jogador.position.y > 0)
         {
             this.jogador.position.y -=  this.curvaGravidade + 0.002;
             this.curvaGravidade +=0.001
@@ -873,9 +1100,45 @@ export class HomePage {
         else
         {
             this.vooando = false;   
+            this.jogador.rotation.x = 0
         }
         
     }
+
+    // Estado dos Carros - Se esta voando e coisa e tal
+    public EstadoCars(objeto: THREE.Mesh, nCars: number)
+    {
+        if(this.carsVooando[nCars])
+        {
+            if(this.carsIgini[nCars])
+            {
+                objeto.position.y += 2 * 3 * 0.02;
+                this.carsTempIgini[nCars]--;
+                
+                if(this.carsTempIgini[nCars] <= 0)
+                {
+                    this.carsIgini[nCars] = false;
+                }
+            }
+            objeto.rotation.x += 0.1;
+        }
+        else
+        {
+            this.carsCruGravi[nCars] = 0;
+        }
+        if(objeto.position.y > 0)
+        {
+            objeto.position.y -= this.carsCruGravi[nCars] + 0.002;
+            this.carsCruGravi[nCars] +=0.001;
+        }
+        else
+        {
+            this.carsVooando[nCars] = false;   
+            objeto.rotation.x = 0;
+        }
+    }
+
+
 
     // Freio - Troca o estado do freio
     public Freio(): void
@@ -884,7 +1147,7 @@ export class HomePage {
         this.freio = !this.freio;
     }
 
-    //Pausa o jogo - Pausa o jogo ou despausa se ja tiver pausado
+    // Pausa o jogo - Pausa o jogo ou despausa se ja tiver pausado
     public Pausar(): void
     {
         let botaoPause = document.getElementById("pause")
@@ -954,7 +1217,47 @@ export class HomePage {
         // 1. Trocar para em vez de uma função de freio para duas
         
     }
+
+    // Tela de loading o jogo - Tela de loading durante o carregamento
+    public Loading(): void
+    {
+        let menuLoading = document.getElementById("telaLoading")
+        menuLoading.style.visibility = "hidden";
+        menuLoading.style.pointerEvents = "none";
+
+        let infoDir = document.getElementById("infosDireita")
+        infoDir.style.visibility = "visible";
+
+        let infoEsq = document.getElementById("infosEsquerda")
+        infoEsq.style.visibility = "visible";
+    }
+
+    // Função para reniciar
+    public Reniciar(): void
+    {
+        if(this.tempoShow <= 0)
+        {
+            this.jogando = false;
+            location.reload();
+        }
+    }
+
+    // Testa se é fim de jogo e abre a tela de fim de jogo
+    public FimDeJogo(): void
+    {
+        if(this.tempoShow <= 0)
+        {
+            let menuFim = document.getElementById("fimDeJogo")
+            menuFim.style.visibility = "visible";
+            menuFim.style.pointerEvents = "all";
     
+            let infoDir = document.getElementById("infosDireita")
+            infoDir.style.visibility = "hidden";
+    
+            let infoEsq = document.getElementById("infosEsquerda")
+            infoEsq.style.visibility = "hidden";
+        }
+    }
 
 
 }
