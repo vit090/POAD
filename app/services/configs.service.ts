@@ -8,5 +8,6 @@ export class ConfigsService {
   constructor() { }
 
   public isCar: boolean;
-  public
+  public music: boolean;
+  public sound: boolean;
 }

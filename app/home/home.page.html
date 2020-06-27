@@ -2,29 +2,56 @@
     <div id="menuPause">
         <p>Debug</p>
         <p>
-            <!--|Jogador| X: {{this.jogador.position.x}}, Z: {{this.jogador.position.z}}-->
+           <!-- |Jogador| X: {{this.jogador.position.x}}, Z: {{this.jogador.position.z}}, Vel: {{this.VelocidadeMundo()}}-->
         </p>
         <p>
-            |Parada| X:{{this.parada.position.x}}, Z: {{this.parada.position.z}}
+            |Pessoas| Rot:{{this.teste1}}
         </p>
         <p>
             |Numero de Batidas| Total: {{this.nBatidas}}
         </p>
         <p>
-            {{this.vooando}}
+            |Tipo de Veiculo| Carro: {{this.configs.isCar}}, Onibus: {{!this.configs.isCar}}
         </p>
+        <p>
+            |Timer| Tempo1: {{this.tempo1}}, Tempo2: {{this.tempo2}}, TempoShow {{this.tempoShow}}
+        </p>
+
+        <button class="botaoNormi" (pointerdown)="TrocarVeiculo()">
+            Veiculo
+        </button>
     </div>
 
     <div class="contador">
-        {{atualPessoas}}
+        {{this.tempoShow}}
     </div>
-    <div class="pause" (pointerdown)="Pausar()">
-        Pause
+    
+
+    <div id="pause" (pointerdown)="Pausar()"></div>
+
+    <div id="telaLoading">
+        <div id=logo></div>
     </div>
+
+    <div id="fimDeJogo">
+        <p> </p>
+        <h1>Fim De Jogo</h1>
+        <p>(Tempo Esgotado)</p>
+        <p>
+            |Pessoas e Batidas|
+        </p>
+        <p>
+            Entregues: {{this.nPessoasEntregues}} | Perdidas: {{this.nPessoasPerdidas}} | Batidas: {{this.nBatidas}}
+        </p>
+        <div class="botaoAnormi" (pointerdown)="Reniciar()"></div>
+        
+    </div>
+
     <div class="infos">
-        <div id="infosEsquerda">{{tempoShow}}</div>
+        <div id="infosEsquerda">{{this.atualPessoas}} / {{this.maxPessoas}}</div>
         <div id="infosDireita">{{quilometragem}}</div>
     </div>
+    
     <div class="cheio" (pointerdown)="Freio()">
         <div class="cheio" (pointerup)="Freio()">
             <!--
@@ -36,4 +63,5 @@
         </div>
      
     </div>
+
 </div>

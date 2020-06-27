@@ -5,6 +5,6 @@
 </ion-header>
 
 <ion-content>
-  <ion-button expand="block" [routerLink]="'/home'">CARRO</ion-button>
-  <ion-button expand="block" [routerLink]="'/home'">ONIBUS</ion-button>
+  <ion-button expand="block" (click)="SelecionarCarro()" [routerLink]="'/home'">CARRO</ion-button>
+  <ion-button expand="block" (click)="SelecionarOnibus()" [routerLink]="'/home'">ONIBUS</ion-button>
 </ion-content>

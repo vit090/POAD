@@ -1,3 +1,4 @@
+import { ConfigsService } from './../services/configs.service';
 import { ScreenOrientation } from '@ionic-native/screen-orientation/ngx';
 import { Component, OnInit } from '@angular/core';
 
@@ -8,10 +9,19 @@ import { Component, OnInit } from '@angular/core';
 })
 export class SelecaoPage implements OnInit {
 
-  constructor(private screenOrientation: ScreenOrientation) { }
+  constructor(private screenOrientation: ScreenOrientation, public configs: ConfigsService) { }
 
   ngOnInit() {
     this.screenOrientation.lock(this.screenOrientation.ORIENTATIONS.LANDSCAPE);
   }
 
+  public SelecionarCarro():void{
+    this.configs.isCar = true;
+    console.log("isCar: " + this.configs.isCar);
+  }
+
+  public SelecionarOnibus():void{
+    this.configs.isCar = false;
+    console.log("isCar: " + this.configs.isCar);
+  }
 }
