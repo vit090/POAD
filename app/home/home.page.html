@@ -1,5 +1,3 @@
-
-
 <div class="cheio">
     <div id="menuPause">
         <p>Debug</p>
@@ -7,13 +5,13 @@
            <!-- |Jogador| X: {{this.jogador.position.x}}, Z: {{this.jogador.position.z}}, Vel: {{this.VelocidadeMundo()}}-->
         </p>
         <p>
-            <!--|Parada| X:{{this.parada.position.x}}, Z: {{this.parada.position.z}}-->
+            |Pessoas| Rot:{{this.teste1}}
         </p>
         <p>
             |Numero de Batidas| Total: {{this.nBatidas}}
         </p>
         <p>
-            |Tipo de Veiculo| Carro: {{this.tipoVeiculo}}, Onibus: {{!this.tipoVeiculo}}
+            |Tipo de Veiculo| Carro: {{this.configs.isCar}}, Onibus: {{!this.configs.isCar}}
         </p>
         <p>
             |Timer| Tempo1: {{this.tempo1}}, Tempo2: {{this.tempo2}}, TempoShow {{this.tempoShow}}
@@ -22,17 +20,38 @@
         <button class="botaoNormi" (pointerdown)="TrocarVeiculo()">
             Veiculo
         </button>
+        <ion-back-button (click)="PararSons()" text="Menu" defaultHref="/selecao"></ion-back-button>
     </div>
 
     <div class="contador">
         {{this.tempoShow}}
     </div>
-    
-    <div id="pause" (mousedown)="Pausar()"></div>
+
+    <div id="pause" (pointerdown)="Pausar()"></div>
+
+    <div id="telaLoading">
+        <div id=logo></div>
+    </div>
+
+    <div id="fimDeJogo">
+        <p> </p>
+        <h1>Fim De Jogo</h1>
+        <p>(Tempo Esgotado)</p>
+        <p>
+            |Pessoas e Batidas|
+        </p>
+        <p>
+            Entregues: {{this.nPessoasEntregues}} | Perdidas: {{this.nPessoasPerdidas}} | Batidas: {{this.nBatidas}}
+        </p>
+        <div class="botaoAnormi" (pointerdown)="Reniciar()"></div>
+        
+    </div>
+
     <div class="infos">
         <div id="infosEsquerda">{{this.atualPessoas}} / {{this.maxPessoas}}</div>
         <div id="infosDireita">{{quilometragem}}</div>
     </div>
+    
     <div class="cheio" (pointerdown)="Freio()">
         <div class="cheio" (pointerup)="Freio()">
             <!--
@@ -45,7 +64,4 @@
      
     </div>
 
-
 </div>
-
-

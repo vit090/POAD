@@ -1,0 +1,13 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/menu"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Seleção</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-button expand="block" (click)="SelecionarCarro()" [routerLink]="'/home'">CARRO</ion-button>
+  <ion-button expand="block" (click)="SelecionarOnibus()" [routerLink]="'/home'">ONIBUS</ion-button>
+</ion-content>

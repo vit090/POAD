@@ -1,3 +1,4 @@
+  
 #tela{
   display: grid;
   grid-template-columns: repeat(1, 50%);
@@ -23,6 +24,23 @@
 .cheio{
   height: 100%;
   width: 100%;
+}
+.meio{
+  height: 50%;
+  width: 50%;
+  background: red;
+}
+
+#logo
+{
+  position: fixed;
+
+  height: 100%;
+  width: 100%;
+
+  background: url("../../assets/Logo.png") center;
+  background-size: 60%, 60%;
+  background-repeat: no-repeat;
 }
 
 .infos{
@@ -50,6 +68,7 @@
   background-size: 100%, 100%;
 }
 
+// Sistema de pause
 #pause
 {
   width: 10%;
@@ -75,12 +94,29 @@
   background-color: rgb(52, 56, 58);
 }
 
+// Sistema de Fim de Jogo
+#fimDeJogo
+{
+  height: 100%;
+  width: 100%;
+
+  color: cyan;
+  text-align: center;
+
+  background-color: rgb(58, 58, 58);
+
+  visibility: hidden;
+  position: fixed;
+}
+
+
 #infosEsquerda
 {
   height: 8%;
   width: 20%;
   position: fixed;
   padding-top: 0.5%;
+  visibility: hidden;
 
   top: 0%;
   left: 24%;
@@ -101,6 +137,7 @@
   width: 20%;
   position: fixed;
   padding-top: 0.5%;
+  visibility: hidden;
 
   top: 0%;
   left: 56%;
@@ -122,8 +159,29 @@
   background-color: rgb(255, 245, 110);
 }
 
+.botaoAnormi
+{
+  width: 10%;
+  height: 20%;
+
+
+  left: 45%;
+  position: fixed;
+
+  background: url("../../assets/BotaoVazio.png");
+  background-size: 100%, 100%;
+}
 .botaoNormi
 {
   height: 10%;
   width: 10%;
+}
+
+#telaLoading
+{
+  height: 100%;
+  width: 100%;
+  background-color: rgb(255, 255, 255);
+  visibility: visible;
+  position: fixed;
 }
