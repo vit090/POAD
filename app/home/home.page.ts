@@ -1,15 +1,10 @@
 import { Platform } from '@ionic/angular';
 import { Component, OnInit } from '@angular/core';
 import { DeviceMotion, DeviceMotionAccelerationData } from '@ionic-native/device-motion/ngx';
-import { ScreenOrientation } from '@ionic-native/screen-orientation/ngx'
+import { ScreenOrientation } from '@ionic-native/screen-orientation/ngx';
 import * as THREE from 'three';
-import { getLocaleTimeFormat } from '@angular/common';
-import { typeWithParameters } from '@angular/compiler/src/render3/util';
-import { VirtualTimeScheduler } from 'rxjs';
-import { createGesture, Gesture } from '@ionic/core';
-import {GLTFLoader} from 'c:/Users/edu06/node_modules/three/examples/jsm/loaders/GLTFLoader'
-//import { runInThisContext } from 'vm';
-
+import {GLTFLoader} from 'c:/Users/edu06/node_modules/three/examples/jsm/loaders/GLTFLoader';
+import { ConfigsService } from './../services/configs.service';
 
 @Component({
   selector: 'app-home',
@@ -18,11 +13,18 @@ import {GLTFLoader} from 'c:/Users/edu06/node_modules/three/examples/jsm/loaders
 })
 export class HomePage {
 
-    constructor(private deviceMotion: DeviceMotion, private plt: Platform, private screenOrientation: ScreenOrientation) {	}
+    constructor(private deviceMotion: DeviceMotion, 
+        private plt: Platform, 
+        private screenOrientation: ScreenOrientation,
+        public configs: ConfigsService) 
+    {}
 
-    //Loader
+    //#region Loader
     private loader: GLTFLoader;
-    // Tempo
+    private audioLoader: THREE.AudioLoader;
+    //#endregion
+    
+    //#region Tempo
     private time: Date;
 	private startTime: number;
     private currentTime: number;
@@ -36,9 +38,12 @@ export class HomePage {
     private tempoAux: number;
     private bonusTimer
     public tempoShow: number;
-    // Configurações do Mundo
+    //#endregion
+
+    //#region Configurações do Mundo
 	private scene:  THREE.Scene;
-	private camera: THREE.PerspectiveCamera;
+    private camera: THREE.PerspectiveCamera;
+    private listener: THREE.AudioListener;
     private renderer: THREE.WebGLRenderer;
     // Configuraçoes de Luzes
 	private a_light: THREE.AmbientLight;
@@ -47,7 +52,12 @@ export class HomePage {
     private cube: THREE.Mesh;
     private jogador: THREE.Mesh;
     private predios;
-    // Configurações de Jogo
+    // Faixas
+    private nFaixas: number;
+    private faixas;
+    //#endregion
+    
+    //#region Configurações de Jogo
     private gameMode: boolean;
     private velocidadeHorizontal: number;
     private velocidadeFrente: number;
@@ -55,7 +65,9 @@ export class HomePage {
     private jogando: boolean;
     private quilometros: number;
     public quilometragem: number;
-    // Configurações de Passageiros
+    //#endregion
+    
+    //#region Configurações de Passageiros
     public nPessoasEntregues: number;
     public nPessoasPerdidas: number;
     public inverter;
@@ -63,9 +75,13 @@ export class HomePage {
     public nPessoas;
     private delayMax: number;
     private delayMin: number;
-    // Configurações de Paradas
+    //#endregion
+    
+    //#region Configurações de Paradas
     public parada: THREE.Mesh;
-    // Informações do veiculo
+    //#endregion
+    
+    //#region Informações do veiculo
     private maxPessoas: number;
     public atualPessoas: number;
     private areaDeColisaoX: number;
@@ -76,17 +92,22 @@ export class HomePage {
     private curvaGravidade: number;
     private velBase: number;
     public velocidadeDoJogador: number;
-    public tipoVeiculo: boolean; // True = Carro || False = Onibus \\
-    // Imortalidade
+    //#endregion
+    
+    //#region Imortalidade
     public imortal: boolean;
     private tempImortal: number;
     public tf: number
-    // Onibus X Carro
+    //#endregion
+    
+    //#region Onibus X Carro
     private velCarro: number;
     private velOnibus: number;
     private maxCarro: number;
     private maxOnibus: number;
-    // Outros Carros na Rua
+    //#endregion
+    
+    //#region Outros Carros na Rua
     private carsIgini;
     private carsVooando;
     private carsTempIgini;
@@ -100,31 +121,50 @@ export class HomePage {
     private velCarrosDireita: number;
     private velCarrosEsquerda: number;
     private posLugares;
-    // Configurações da Rampa
+    //#endregion
+
+    //#region Configurações da Rampa
     public rampa: THREE.Mesh;
-    // Teste
+    //#endregion
+
+    //#region Teste - Debug
     public teste1: number;
     public teste2: number;
     public teste3: number;
     public teste4: number;    
-    // Variaveis de carregamento 
+    //#endregion
+
+    //#region Variaveis de carregamento 
 	public carregouJogador: boolean = false;
 	public carregouPredios: boolean = false;
 	public carregouPessoas: boolean = false;
 	public carregouParadas: boolean = false;
 	public carregouRampas: boolean = false;
-	public carregouCarros: boolean = false;
-    // Para angulos
+    public carregouCarros: boolean = false;
+    public carregouMusica: boolean = false;
+    private sonsCarregados:number = 0;
+    //#endregion
+
+    //#region  Para angulos
     private PI: number = 3.14159265359;
     private angulo: number = this.PI/180;
+    //#endregion
+
+    //#region Sons
+    private topGear: THREE.Audio;
+    private som_buzina: THREE.Audio;
+    private som_entrega: THREE.Audio;
+    private som_freio: THREE.Audio;
+    private som_batida: THREE.Audio;
+    private som_grito: THREE.Audio;
+    private som_PegouPassageiro: THREE.Audio;
+    //#endregion
 
     ngOnInit()
     {
         // Valores globais
         const PI = 3.14159265359;
 
-        // Seletor de Veiculo
-        this.tipoVeiculo = true;
         // Timer
         this.time = new Date();
         this.startTime = this.time.getTime();
@@ -135,40 +175,48 @@ export class HomePage {
         this.CreatScene();
 
         this.Update();
+
+        console.log("IsCar: " + this.configs.isCar);
     }
     
-    
     public CreatScene(): void{
-        // Definição da Cena
+        //#region Definição da Cena
         this.scene = new THREE.Scene();
-        
+
         //Loader
         this.loader = new GLTFLoader();
+        this.audioLoader = new THREE.AudioLoader();
 
         // Tempo
         this.multFrame = 0.002;
-
-        // Definições do Timer
-        this.tempoShow = 30;
+        //#endregion
+        
+        //#region Definições do Timer
+        this.tempoShow = 200;
         this.bonusTimer = 10;
         this.tempo1 = 0;
         this.tempo2 = 0;
         this.frst = true;
         this.tempoAux = 0;
-
-        // Definição de Camera
+        //#endregion
+        
+        //#region Definição de Camera
         this.camera = new THREE.PerspectiveCamera( 35, window.innerWidth / window.innerHeight, 1, 1000 );
         this.camera.position.z = 5.5;
         this.camera.position.y = 4;
         this.camera.lookAt(0, 2, 0.5);
+        this.listener = new THREE.AudioListener();
+        this.camera.add(this.listener);
+        //#endregion
         
-        // Definições de Renderer
+        //#region Definições de Renderer
 		this.renderer = new THREE.WebGLRenderer({ antialias: true});
 		this.renderer.setSize( window.innerWidth, window.innerHeight );
 		this.renderer.setClearColor('#6e6f70');
         document.body.appendChild( this.renderer.domElement );
-        
-        // Definições de Luzes
+        //#endregion
+              
+        //#region Definições de Luzes
         this.a_light= new THREE.AmbientLight(0xffffff, 0.5);
 		this.scene.add(this.a_light);
 		this.p_light = new THREE.PointLight(0xffffff, 0.5);
@@ -177,16 +225,18 @@ export class HomePage {
     	this.p_light.position.y = 10;
     	this.p_light.position.z = 3;
         this.p_light.lookAt(0, 0, 0);
+        //#endregion      
 
-        // Definições do jogo
+        //#region Definições do jogo
         this.velocidadeHorizontal = 1;
         this.velocidadeFrente = 50;
         this.freio = false;
         this.jogando = false;
         this.quilometragem = 0;
         this.quilometros = 0;
+        //#endregion  
         
-        // Definições das pessoas
+        //#region Definições das pessoas
         this.nPessoasPerdidas = 0;
         this.nPessoasEntregues = 0;
         this.inverter = [];
@@ -194,9 +244,9 @@ export class HomePage {
         this.delayMin = 5;
         this.nPessoas = 8;
         this.pessoas = [];
+        //#endregion
 
-
-        // Definições do veiculo
+        //#region Definições do veiculo
         this.atualPessoas = 0;
         this.areaDeColisaoX = 0.4;
         this.nBatidas = 0;
@@ -206,18 +256,14 @@ export class HomePage {
         this.tempIginicao = 20;
         this.curvaGravidade = 0;
         this.velocidadeDoJogador = 0;
-        
-        // Imortalidade
+        //#endregion
+          
+        //#region Imortalidade
         this.imortal = false;
         this.tempImortal = 80;
-
-        // Onibus X Carro
-        this.velCarro = 1;
-        this.velOnibus = 0.5;
-        this.maxCarro = 4;
-        this.maxOnibus = 20;
-
-        // Outros Carros na Rua
+        //#endregion
+        
+        //#region Outros Carros na Rua
         this.carrosDelayMax = 10
         this.carrosDelayMin = 2;
         this.nCarrosDireita = 7;
@@ -225,7 +271,14 @@ export class HomePage {
         this.velCarrosDireita = 1.2;
         this.velCarrosEsquerda = 1.5;
         this.posLugares = [-2.2, -1.1, 1.1, 2.2];
-        if(this.tipoVeiculo)
+        //#endregion
+          
+        //#region Onibus X Carro
+        this.velCarro = 1;
+        this.velOnibus = 0.8;
+        this.maxCarro = 4;
+        this.maxOnibus = 20;
+        if(this.configs.isCar)
         {
             // Carro
             this.maxPessoas = this.maxCarro;
@@ -237,6 +290,12 @@ export class HomePage {
             this.maxPessoas = this.maxOnibus;
             this.velBase = this.velOnibus;
         }
+        //#endregion
+        
+        //#region Mundo
+        this.nFaixas = 11;
+        //#endregion
+
         // Testes
         this.teste1 = 0;
         this.teste2 = 0;
@@ -247,17 +306,24 @@ export class HomePage {
         
         ///////////////////////////////////////////////////////////////////////////
 
-        // Atualização do tamanha da janela
+        //#region Atualização do tamanha da janela
         window.addEventListener('resize',() => {
 			this.renderer.setSize( window.innerWidth, window.innerHeight );
 			this.camera.aspect = window.innerWidth/ window.innerHeight;
 			this.camera.updateProjectionMatrix();
         })
-        
+        //#endregion
+
+        //#region mundo
+
         // Base para cubos
     	let geometry = new THREE.BoxGeometry(4, 0.1, 30);
         let material = new THREE.MeshLambertMaterial( { color: 0xAEAEAC } );
-        
+
+        //#endregion
+
+        //#region Ruas
+
         // Calsada da direita
         this.cube = new THREE.Mesh( geometry, material );
         this.cube.position.y = 0;
@@ -281,9 +347,27 @@ export class HomePage {
         this.cube.position.z = -12;
         this.scene.add(this.cube);
 
-        //Caixas - Predios
+        // Faixas
+        this.faixas = [];
+        geometry = new THREE.BoxGeometry(0.1, 0.01, 1)
+        material = new THREE.MeshLambertMaterial( { color: 0xffffff } );
+        for(let i:number = 0; i<this.nFaixas; i++)
+        {
+            let obj:THREE.Mesh;
+            obj = new THREE.Mesh( geometry, material );
+            obj.position.y = 0.01;
+            obj.position.z = -i * 2;
+            this.faixas[i] = obj;
+            this.scene.add(this.faixas[i]);
+        }
+
+
+        //#endregion
+
+        //Predios
         this.predios = [];
-        // Predios da direita
+
+        //#region Predios da direita
         for(let i:number = 0; i<10; i++)
         {
             let tipo = Math.floor(Math.random() * 5 + 1);
@@ -297,8 +381,9 @@ export class HomePage {
 				this.scene.add(this.predios[i]);
 			});
         }
+        //#endregion
 
-        // Predios da esquerda 
+        //#region Predios da esquerda 
         for(let k:number = 10; k < 20; k++)
         {
             let tipo = Math.floor(Math.random() * 5 + 1);
@@ -316,8 +401,9 @@ export class HomePage {
 				}
 			});
         }
-        
-        // Pessoas
+        //#endregion
+
+        //#region Pessoas
         for(let i:number = 0; i < this.nPessoas; i++)
         {
             let t = Math.floor(Math.random() * 2 + 1);
@@ -349,7 +435,8 @@ export class HomePage {
 					this.carregouPessoas = true;
 				}
 			})
-		}
+        }
+        //#endregion
 
         // Outros Carros na Rua
         this.carrosDireita = [];
@@ -359,7 +446,7 @@ export class HomePage {
         this.carsTempIgini = [];
         this.carsCruGravi = [];
 
-        // Carros da Direita
+        //#region Carros da Direita
         for(let j:number = 0; j < this.nCarrosDireita; j++)
         {
             let pos = Math.floor(Math.random() * 2);
@@ -391,8 +478,9 @@ export class HomePage {
 
          });
         }
+        //#endregion
 
-        // Carros da Esquerda
+        //#region Carros da Esquerda
         for(let j:number = 0; j < this.nCarrosEsquerda; j++)
         {
             let pos = Math.floor(Math.random() * 2);
@@ -425,8 +513,9 @@ export class HomePage {
 			}
          });
         }
-        
-        // Parada
+        //#endregion
+
+        //#region Parada
         let parada:THREE.Mesh;
         this.LoadObj("../../assets/Ponto.glb", mesh =>{
             this.parada = mesh;
@@ -438,8 +527,9 @@ export class HomePage {
             this.scene.add(this.parada)
             this.carregouParadas = true;
         });
+        //#endregion
 
-        // Rampa
+        //#region Rampa
         let rampa:THREE.Mesh;
         this.LoadObj("../../assets/Rampa.glb", mesh =>{
             this.rampa = mesh;
@@ -449,13 +539,13 @@ export class HomePage {
             this.scene.add(this.rampa);
             this.carregouRampas = true;
         });
+        //#endregion
 
-
-        // Jogador
+        //#region Jogador
         let veiuculoDoJogador = "Carro";
         let skinDoVeiculo = 1;
 
-        if(this.tipoVeiculo)
+        if(this.configs.isCar)
         {
             veiuculoDoJogador = "Carro" // Define o tipo do veiculo como Carro
         }
@@ -476,7 +566,7 @@ export class HomePage {
             this.jogador.receiveShadow= true;
             this.scene.add(this.jogador);
 
-            if(this.tipoVeiculo)
+            if(this.configs.isCar)
             {
                 this.jogador.scale.set(0.2, 0.2, 0.15);
             }
@@ -486,12 +576,54 @@ export class HomePage {
             }
 
 			this.carregouJogador = true;
-		});
-        
+        });
+        //#endregion
+
+        //#region Sons 
+        //sons
+        this.LoadAudio("../../assets/audio/TopGear.mp3", sound => {
+            this.topGear = sound;
+            this.topGear.setLoop(true);
+            this.topGear.play();
+            this.sonsCarregados ++;
+        })
+        this.LoadAudio("../../assets/audio/bibi.mp3", sound => {
+            this.som_buzina = sound;
+            this.sonsCarregados ++;
+        })
+        this.LoadAudio("../../assets/audio/freio.mp3", sound => {
+            this.som_freio = sound;
+            this.sonsCarregados ++;
+        })
+        this.LoadAudio("../../assets/audio/pei.mp3", sound => {
+            this.som_batida = sound;
+            this.sonsCarregados ++;
+        })
+        this.LoadAudio("../../assets/audio/uhul.mp3", sound => {
+            this.som_entrega = sound;
+            this.sonsCarregados ++;
+        })
+        this.LoadAudio("../../assets/audio/aaa.mp3", sound => {
+            this.som_grito = sound;
+            this.sonsCarregados ++;
+        })
+        this.LoadAudio("../../assets/audio/pegouPassageiro.mp3", sound => {
+            this.som_PegouPassageiro = sound;
+            this.sonsCarregados ++;
+        })
+
+        //#endregion
+
 
     }
 
-     //FUNÇÃO QUE CARREGA MODELOS 
+    // Função para parar os sons do jogo
+    public PararSons(){
+        this.topGear.stop();
+        this.jogando = false;
+    }
+
+    // Função que carrega os modelos 
 	public LoadObj(caminho: string, callback){
 
         //UMA MESH QUE É CRIADA
@@ -522,6 +654,19 @@ export class HomePage {
 
 	}
 
+    // Função que carrega os audios
+    public LoadAudio(caminho: string, callback){
+
+        let sound = new THREE.Audio( this.listener );
+
+        this.audioLoader.load(caminho, handle_load);
+
+        function handle_load( buffer ){
+            sound.setBuffer( buffer );
+            callback(sound);
+        }
+    }
+
     // Função de upadate do jogo
 	public Update(): void{
 
@@ -532,27 +677,39 @@ export class HomePage {
 		this.renderer.render( this.scene, this.camera );
 		
 		this.plt.ready().then( ()=>{
+
+            // Verifica se esta Reniciando
+            if(this.configs.voltou)
+            {
+                this.configs.voltou = false;
+                location.reload();
+            }
+
             // Funções no jogo
             if(this.carregouPredios == true && 
                 this.carregouCarros == true && 
                 this.carregouPessoas == true && 
                 this.carregouParadas == true && 
                 this.carregouRampas == true &&
+                this.sonsCarregados == 7 &&
                 this.frst == true
             )
             {   
                 this.Loading();
                 this.jogando = true;
+                this.configs.voltou = false;
             }
+            
 
             if(this.jogando)
             {
-                //this.jogador.rotation.x += 0.05;
+                //this.configs.voltou = true;
                 this.MoverComGiroscopio();
                 if(!this.vooando)
                 {
                     this.ControleFreio();
                 }
+                this.MoverFaixas();
                 this.MoverCenario();
                 this.MoverPessoas();
                 this.MoverParadas();
@@ -564,14 +721,39 @@ export class HomePage {
                 this.FimDeJogo();
             }     
             this.DeltaTimer();
-            
 		});
-
-        
         
         //console.log(this.DeltaTime());
         this.time = new Date;//
         this.lastFrameTime = this.time.getTime();
+    }
+
+    // Função para descarregar todos os objetos da cena
+    public DescarregarTudo()
+    {
+        var to_remove = [];
+
+        this.scene.traverse ( function( child ) {
+            if ( child instanceof THREE.Mesh && !child.userData.keepMe === true ) {
+                to_remove.push( child );
+            }
+            if ( child instanceof this.predios && !child.userData.keepMe === true ) {
+                to_remove.push( child );
+            }
+            if ( child instanceof this.carrosEsquerda && !child.userData.keepMe === true ) {
+                to_remove.push( child );
+            }
+            if ( child instanceof this.carrosDireita && !child.userData.keepMe === true ) {
+                to_remove.push( child );
+            }
+            if ( child instanceof this.pessoas && !child.userData.keepMe === true ) {
+                to_remove.push( child );
+            }
+        } );
+    
+        for ( var i = 0; i < to_remove.length; i++ ) {
+            this.scene.remove( to_remove[i] );
+        }
     }
 
     // Função que retorna velocidade do mundo - Ou seja a velociade do Veiculo/Jogador
@@ -607,7 +789,7 @@ export class HomePage {
             this.carrosDireita[i].position.z += this.VelocidadeMundo() - this.velCarrosDireita * 0.02;
 
             // Faz o respawn
-            if(this.carrosDireita[i].position.z >= 1)
+            if(this.carrosDireita[i].position.z >= 1.5)
             {
                 this.carrosDireita[i].position.x = pos;
                 this.carrosDireita[i].position.z = -20 - delay;
@@ -620,12 +802,15 @@ export class HomePage {
                 if(this.atualPessoas != 0)
                 {
                     // Perder pessoas
+                    this.som_grito.play();
                     this.atualPessoas--;
                     this.nPessoasPerdidas++;
                 }
                 this.carrosDireita[i].position.x = pos;
                 this.carrosDireita[i].position.z = -20 - delay;
                 this.nBatidas++;
+                this.som_batida.play();
+                this.som_buzina.play();
                 this.imortal = true;
             }
 
@@ -665,7 +850,7 @@ export class HomePage {
             this.carrosEsquerda[i].position.z += this.VelocidadeMundo() - this.velCarrosEsquerda * -0.02;
 
             // Faz o respawn
-            if(this.carrosEsquerda[i].position.z >= 1)
+            if(this.carrosEsquerda[i].position.z >= 1.5)
             {
                 this.carrosEsquerda[i].position.x = pos;
                 this.carrosEsquerda[i].position.z = -20 - delay;
@@ -678,11 +863,14 @@ export class HomePage {
                 if(this.atualPessoas != 0)
                 {
                     // Perder pessoas
+                    this.som_grito.play();
                     this.atualPessoas--;
                     this.nPessoasPerdidas++;
                 }
                 this.carrosEsquerda[i].position.x = pos;
                 this.carrosEsquerda[i].position.z = -20 - delay;
+                this.som_batida.play();
+                this.som_buzina.play();
                 this.nBatidas++;
                 this.imortal = true;
             }
@@ -713,7 +901,7 @@ export class HomePage {
     {
         this.parada.position.z += this.VelocidadeMundo();
             
-        if(this.parada.position.z >= 1)
+        if(this.parada.position.z >= 2)
         {
             let lado;
             lado = Math.floor(Math.random() * 2);
@@ -744,10 +932,23 @@ export class HomePage {
                 this.parada.position.z = -30 - delay * 2;
 
                 // Descarregar pessoas
+                this.som_entrega.play();
                 this.nPessoasEntregues += this.atualPessoas;
                 this.tempoAux += this.atualPessoas * this.bonusTimer;
                 this.atualPessoas = 0;
             }      
+        }
+    }
+
+    // Função para mover faixas
+    public MoverFaixas(): void{
+        for(let i:number = 0; i < this.nFaixas; i++)
+        {
+            this.faixas[i].position.z += this.VelocidadeMundo()
+            if(this.faixas[i].position.z >= 1)
+            {
+                this.faixas[i].position.z = -22;
+            }
         }
     }
 
@@ -760,7 +961,7 @@ export class HomePage {
             this.pessoas[i].position.z += this.VelocidadeMundo();
             
             // Saiu fora de camera
-            if(this.pessoas[i].position.z >= 1)
+            if(this.pessoas[i].position.z >= 1.5)
             {
                 let lado;
                 lado = Math.floor(Math.random() * 2);
@@ -788,7 +989,7 @@ export class HomePage {
                     lado = Math.floor(Math.random() * 2);
                     let delay = Math.floor(Math.random() * (this.delayMax - this.delayMin + 1) ) + this.delayMin;
                     this.pessoas[i].position.z = -30 - delay;
-    
+                    this.som_PegouPassageiro.play();
                     this.atualPessoas++;
                 }
             }
@@ -824,7 +1025,7 @@ export class HomePage {
     public Rampa(): void
     {
 
-        if(this.rampa.position.z > 1)
+        if(this.rampa.position.z > 2)
         {
             let delay = Math.floor(Math.random() * (this.delayMax - this.delayMin + 1) ) + this.delayMin;
 
@@ -893,6 +1094,7 @@ export class HomePage {
         }
     }
 
+    // Colisao dos carros com a rampa
     public ColisaoUmComOutro(Voce: THREE.Mesh, Outro: THREE.Mesh, nCars: number, ColX: number, ColZ: number): boolean
     {
         if(!this.carsVooando[nCars])
@@ -906,8 +1108,6 @@ export class HomePage {
             } 
         }
     }
-
-
     
     // Testar Colisão, cria tabela verdade de posição - Função para Debug
     public TestarColisao(objeto: THREE.Mesh, ColX: number, ColZ: number): void
@@ -999,9 +1199,9 @@ export class HomePage {
 
     // Troca de veiculo no jogo - Função para Debug
     public TrocarVeiculo(): void{
-        this.tipoVeiculo = !this.tipoVeiculo;
+        this.configs.isCar = !this.configs.isCar;
 
-        if(this.tipoVeiculo)
+        if(this.configs.isCar)
         {
             // Carro
             this.maxPessoas = 4;
@@ -1138,8 +1338,6 @@ export class HomePage {
         }
     }
 
-
-
     // Freio - Troca o estado do freio
     public Freio(): void
     {
@@ -1181,10 +1379,11 @@ export class HomePage {
         // Esta freiando
         if(this.freio)
         {
+            this.som_freio.play();
             if(this.velocidadeFrente > 5)
             {
                 // Vermelho, esta diminundo a velocidade
-                this.velocidadeFrente -= 15 * 0.02;
+                this.velocidadeFrente -= 50 * 0.02;
                 this.jogador.material = new THREE.MeshLambertMaterial( { color: 0xF70A0A } );
             }
             else
@@ -1235,6 +1434,9 @@ export class HomePage {
     // Função para reniciar
     public Reniciar(): void
     {
+        this.configs.voltou = true;
+
+
         if(this.tempoShow <= 0)
         {
             this.jogando = false;
@@ -1247,6 +1449,10 @@ export class HomePage {
     {
         if(this.tempoShow <= 0)
         {
+            this.jogando = false;
+
+            this.scene = null;
+            this.renderer = null;
             let menuFim = document.getElementById("fimDeJogo")
             menuFim.style.visibility = "visible";
             menuFim.style.pointerEvents = "all";
@@ -1259,5 +1465,20 @@ export class HomePage {
         }
     }
 
+    // Voltar para algum menu
+    public Voltar(): void
+    {
+        this.configs.voltou = true;
+        this.PararSons();
+        this.configs.voltou = true;
+    }
 
+    // Recarregar a Cena
+    public Recarregar(): void{
+        if(this.configs.voltou)
+        {
+            location.reload();
+        }
+    }
+    
 }

@@ -1,0 +1,27 @@
+//
+.BotaoEsquerdo
+{
+  height: 100%;
+  width: 50%;
+
+  position: fixed;
+}
+.BotaoCerto
+{
+  height: 100%;
+  width: 50%;
+  background: red;
+  position: fixed;
+  left: 50%;
+}
+
+.botaoVoltar
+{
+  width: 10%;
+  height: 20%;
+
+  position: fixed;
+
+  background: url("../../assets/BotaoVoltar.png");
+  background-size: 100%, 100%;
+}

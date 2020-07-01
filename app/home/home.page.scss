@@ -1,3 +1,4 @@
+  
 #tela{
   display: grid;
   grid-template-columns: repeat(1, 50%);
@@ -37,7 +38,7 @@
   height: 100%;
   width: 100%;
 
-  background: url("../../assets/Logo.png") center;
+  background: url("../../assets/logo.png") center;
   background-size: 60%, 60%;
   background-repeat: no-repeat;
 }
@@ -84,6 +85,9 @@
 }
 #menuPause
 {
+  color: cyan;
+  text-align: center;
+
   pointer-events: none;
   visibility: hidden;
   height: 90%;
@@ -156,6 +160,19 @@
   height: 10%;
   width: 100%;
   background-color: rgb(255, 245, 110);
+}
+
+.botaoVoltar
+{
+  width: 15%;
+  height: 30%;
+
+
+  left: 42.5%;
+  position: fixed;
+
+  background: url("../../assets/BotaoVoltar.png");
+  background-size: 100%, 100%;
 }
 
 .botaoAnormi

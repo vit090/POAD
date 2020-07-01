@@ -1,52 +1,38 @@
-
-
-<div class="cheio">
+<div class="cheio" onload="Recarregar()">
+    <!-- Menu de Pause -->
     <div id="menuPause">
-        <p>Debug</p>
+        <p>'</p>
         <p>
-           <!-- |Jogador| X: {{this.jogador.position.x}}, Z: {{this.jogador.position.z}}, Vel: {{this.VelocidadeMundo()}}-->
+            | Pessoas e Batidas |
         </p>
         <p>
-            |Pessoas| Rot:{{this.teste1}}
+            Entregues: {{this.nPessoasEntregues}} | Perdidas: {{this.nPessoasPerdidas}} | Batidas: {{this.nBatidas}}
         </p>
-        <p>
-            |Numero de Batidas| Total: {{this.nBatidas}}
-        </p>
-        <p>
-            |Tipo de Veiculo| Carro: {{this.tipoVeiculo}}, Onibus: {{!this.tipoVeiculo}}
-        </p>
-        <p>
-            |Timer| Tempo1: {{this.tempo1}}, Tempo2: {{this.tempo2}}, TempoShow {{this.tempoShow}}
-        </p>
-
-        <button class="botaoNormi" (pointerdown)="TrocarVeiculo()">
-            Veiculo
-        </button>
+        
+        <ion-back-button class="botaoVoltar" (click)="Voltar()" icon = null defaultHref="/selecao"></ion-back-button>
     </div>
 
     <div class="contador">
         {{this.tempoShow}}
     </div>
-    
 
     <div id="pause" (pointerdown)="Pausar()"></div>
 
     <div id="telaLoading">
         <div id=logo></div>
     </div>
-
+    <!-- Menu de Fim de Jogo -->
     <div id="fimDeJogo">
-        <p> </p>
         <h1>Fim De Jogo</h1>
         <p>(Tempo Esgotado)</p>
         <p>
-            |Pessoas e Batidas|
+            | Pessoas e Batidas |
         </p>
         <p>
             Entregues: {{this.nPessoasEntregues}} | Perdidas: {{this.nPessoasPerdidas}} | Batidas: {{this.nBatidas}}
         </p>
-        <div class="botaoAnormi" (pointerdown)="Reniciar()"></div>
-        
+
+        <ion-back-button class="botaoVoltar" (click)="Voltar()" icon = null defaultHref="/selecao"></ion-back-button>
     </div>
 
     <div class="infos">
@@ -54,10 +40,11 @@
         <div id="infosDireita">{{quilometragem}}</div>
     </div>
     
-    <div class="cheio" (pointerdown)="Freio()">
-        <div class="cheio" (pointerup)="Freio()">
+    <div class="cheio" fill=clear (pointerdown)="Freio()">
+        <div class="cheio" fill=clear (pointerup)="Freio()">
             <!--
             <div id="tela">
+                (pointerup)
                 <div id="TelaEsquerda"></div>
                 <div id="TelaDireita"></div>
             </div>
@@ -66,7 +53,4 @@
      
     </div>
 
-
 </div>
-
-
