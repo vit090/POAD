@@ -13,6 +13,7 @@ export class MenuPage implements OnInit {
 
   ngOnInit() {
     this.screenOrientation.lock(this.screenOrientation.ORIENTATIONS.LANDSCAPE);
+    this.configs.sound = true;
   }
 
   // Recarregar a Cena

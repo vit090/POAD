@@ -1,0 +1,11 @@
+<div id="Fundo"></div>
+
+<div id="Exibicao"></div>
+
+<div id="Esquerda" (pointerdown)="MoverEsquerda()"></div>
+
+<div id="Escolher" (pointerdown)="Escolher()" [routerLink]="'/home'"></div>
+
+<div id="Direita" (pointerdown)="MoverDireita()"></div>
+
+<ion-back-button class="botaoVoltar" (click)="Voltar()" icon = null defaultHref="/selecao"></ion-back-button>

@@ -4,6 +4,7 @@
 .Fundo
 {
     background: url("../../assets/Fundo.png");
+    background-repeat:no-repeat;
     background-size: 100%, 100%;
     height: 100%;
     width: 100%;
@@ -26,6 +27,7 @@
     top: 5%;
 
     background: url("../../assets/logo.png");
+    background-repeat:no-repeat;
     background-size: 100%, 100%;
 }
 
@@ -43,6 +45,7 @@
 }
 #Opcoes
 {
+    background-repeat:no-repeat;
     position: fixed;
     left: 42.5%;
     top: 50%;

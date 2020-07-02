@@ -12,5 +12,11 @@ export class OpcoesPage implements OnInit {
 
   ngOnInit() {
   }
+
+  public Audio()
+  {
+    this.configs.sound = !this.configs.sound;
+  }
 }
- 
+
+

@@ -65,6 +65,7 @@
   text-align-last: center;
   padding-top: 2.5%;
   background: url("../../assets/BotaoVazio.png");
+  background-repeat:no-repeat;
   background-size: 100%, 100%;
 }
 
@@ -75,6 +76,7 @@
   height: 20%;
   //background-color: red;
   background: url('../../assets/BotaoPause.png');
+  background-repeat:no-repeat;
   background-size: 100%, 100%;
   margin: 0 auto;
   left: 90%;
@@ -185,6 +187,7 @@
   position: fixed;
 
   background: url("../../assets/BotaoVazio.png");
+  background-repeat:no-repeat;
   background-size: 100%, 100%;
 }
 .botaoNormi

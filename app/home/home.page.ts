@@ -546,19 +546,8 @@ export class HomePage {
         //#endregion
 
         //#region Jogador
-        let veiuculoDoJogador = "Carro";
-        let skinDoVeiculo = 1;
 
-        if(this.configs.isCar)
-        {
-            veiuculoDoJogador = "Carro" // Define o tipo do veiculo como Carro
-        }
-        else
-        {
-            veiuculoDoJogador = "Onibus" // Define o tipo do veiculo como Onibus
-        }
-
-        this.LoadObj("../../assets/" + veiuculoDoJogador +"_" + skinDoVeiculo + ".glb", mesh =>{
+        this.LoadObj("../../assets/" + this.configs.veiculo + ".glb", mesh =>{
             this.jogador = mesh;
             this.jogador.position.z = -0.1;
             this.jogador.position.y = 0;
@@ -584,37 +573,47 @@ export class HomePage {
         //#endregion
 
         //#region Sons 
-        //sons
-        this.LoadAudio("../../assets/audio/TopGear.mp3", sound => {
-            this.topGear = sound;
-            this.topGear.setLoop(true);
-            this.topGear.play();
-            this.sonsCarregados ++;
-        })
-        this.LoadAudio("../../assets/audio/bibi.mp3", sound => {
-            this.som_buzina = sound;
-            this.sonsCarregados ++;
-        })
-        this.LoadAudio("../../assets/audio/freio.mp3", sound => {
-            this.som_freio = sound;
-            this.sonsCarregados ++;
-        })
-        this.LoadAudio("../../assets/audio/pei.mp3", sound => {
-            this.som_batida = sound;
-            this.sonsCarregados ++;
-        })
-        this.LoadAudio("../../assets/audio/uhul.mp3", sound => {
-            this.som_entrega = sound;
-            this.sonsCarregados ++;
-        })
-        this.LoadAudio("../../assets/audio/aaa.mp3", sound => {
-            this.som_grito = sound;
-            this.sonsCarregados ++;
-        })
-        this.LoadAudio("../../assets/audio/pegouPassageiro.mp3", sound => {
-            this.som_PegouPassageiro = sound;
-            this.sonsCarregados ++;
-        })
+
+        if(this.configs.sound)
+        {
+            //sons
+            this.LoadAudio("../../assets/audio/TopGear.mp3", sound => {
+                this.topGear = sound;
+                this.topGear.setLoop(true);
+                this.topGear.play();
+                this.sonsCarregados ++;
+            })
+            this.LoadAudio("../../assets/audio/bibi.mp3", sound => {
+                this.som_buzina = sound;
+                this.sonsCarregados ++;
+            })
+            this.LoadAudio("../../assets/audio/freio.mp3", sound => {
+                this.som_freio = sound;
+                this.sonsCarregados ++;
+            })
+            this.LoadAudio("../../assets/audio/pei.mp3", sound => {
+                this.som_batida = sound;
+                this.sonsCarregados ++;
+            })
+            this.LoadAudio("../../assets/audio/uhul.mp3", sound => {
+                this.som_entrega = sound;
+                this.sonsCarregados ++;
+            })
+            this.LoadAudio("../../assets/audio/aaa.mp3", sound => {
+                this.som_grito = sound;
+                this.sonsCarregados ++;
+            })
+            this.LoadAudio("../../assets/audio/pegouPassageiro.mp3", sound => {
+                this.som_PegouPassageiro = sound;
+                this.sonsCarregados ++;
+            })
+        }
+        else
+        {
+            this.sonsCarregados = 7;
+        }
+
+        
 
         //#endregion
 
