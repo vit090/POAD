@@ -17,11 +17,11 @@ export class SelecaoPage implements OnInit {
 
   public SelecionarCarro():void{
     this.configs.isCar = true;
-    console.log("isCar: " + this.configs.isCar);
+    
   }
 
   public SelecionarOnibus():void{
     this.configs.isCar = false;
-    console.log("isCar: " + this.configs.isCar);
+    
   }
 }

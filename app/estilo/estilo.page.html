@@ -7,6 +7,9 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content>
+<div id="Esquerda" (pointerdown)="MoverEsquerda()"></div>
 
-</ion-content>
+<div id="Escolher" (pointerdown)="Escolher()" [routerLink]="'/home'"></div>
+
+<div id="Direita" (pointerdown)="MoverDireita()"></div>
+

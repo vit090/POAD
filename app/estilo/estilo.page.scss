@@ -1,1 +1,32 @@
-//
+#Esquerda{
+    position: fixed;
+    left: 0%;
+    top: 50%;
+    width: 25%;
+    height: 35%;
+
+    background: url("../../assets/BotaoEsquerdo.png");
+    background-size: 100% 100%;
+}
+
+#Direita{
+    position: fixed;
+    right: 0%;
+    top: 50%;
+    width: 25%;
+    height: 35%;
+
+    background: url("../../assets/BotaoCerto.png");
+    background-size: 100% 100%;
+}
+
+#Escolher{
+    position: fixed;
+    right: 38%;
+    top: 68%;
+    width: 22%;
+    height: 30%;
+
+    background: url("../../assets/BotaoPlay.png");
+    background-size: 100% 100%;
+}

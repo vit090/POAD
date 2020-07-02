@@ -32,8 +32,8 @@ export class HomePage {
     private currentFrameTime: number;
     private multFrame: number;
     // Timer
-    private tempo1: number;
-    private tempo2: number;
+    public tempo1: number;
+    public tempo2: number;
     private frst: boolean;
     private tempoAux: number;
     private bonusTimer
@@ -58,6 +58,7 @@ export class HomePage {
     private jogando: boolean;
     private quilometros: number;
     public quilometragem: number;
+    private stopGame: boolean;
     // Configurações de Passageiros
     public nPessoasEntregues: number;
     public nPessoasPerdidas: number;
@@ -69,10 +70,10 @@ export class HomePage {
     // Configurações de Paradas
     public parada: THREE.Mesh;
     // Informações do veiculo
-    private maxPessoas: number;
+    public maxPessoas: number;
     public atualPessoas: number;
     private areaDeColisaoX: number;
-    private nBatidas: number;
+    public nBatidas: number;
     private vooando: boolean;
     private iguinicao: boolean;
     private tempIginicao: number;
@@ -117,18 +118,25 @@ export class HomePage {
 	public carregouRampas: boolean = false;
     public carregouCarros: boolean = false;
     public carregouMusica: boolean = false;
+    private sonsCarregados:number = 0;
     // Para angulos
     private PI: number = 3.14159265359;
     private angulo: number = this.PI/180;
-    //Musica Top
+    //SONS
     private topGear: THREE.Audio;
+    private som_buzina: THREE.Audio;
+    private som_entrega: THREE.Audio;
+    private som_freio: THREE.Audio;
+    private som_batida: THREE.Audio;
+    private som_grito: THREE.Audio;
+    private som_PegouPassageiro: THREE.Audio;
     //#endregion
 
     ngOnInit()
     {
         // Valores globais
         const PI = 3.14159265359;
-
+        this.stopGame = false;
         // Timer
         this.time = new Date();
         this.startTime = this.time.getTime();
@@ -494,13 +502,44 @@ export class HomePage {
 
 			this.carregouJogador = true;
         });
-        
+        //---------------------------------------------------------------
+        //sons
         this.LoadAudio("../../assets/audio/TopGear.mp3", sound => {
             this.topGear = sound;
             this.topGear.setLoop(true);
             this.topGear.play();
-            this.carregouMusica = true;
+            this.sonsCarregados ++;
         })
+        this.LoadAudio("../../assets/audio/bibi.mp3", sound => {
+            this.som_buzina = sound;
+            this.sonsCarregados ++;
+        })
+        this.LoadAudio("../../assets/audio/freio.mp3", sound => {
+            this.som_freio = sound;
+            this.sonsCarregados ++;
+        })
+        this.LoadAudio("../../assets/audio/pei.mp3", sound => {
+            this.som_batida = sound;
+            this.sonsCarregados ++;
+        })
+        this.LoadAudio("../../assets/audio/uhul.mp3", sound => {
+            this.som_entrega = sound;
+            this.sonsCarregados ++;
+        })
+        this.LoadAudio("../../assets/audio/aaa.mp3", sound => {
+            this.som_grito = sound;
+            this.sonsCarregados ++;
+        })
+        this.LoadAudio("../../assets/audio/pegouPassageiro.mp3", sound => {
+            this.som_PegouPassageiro = sound;
+            this.sonsCarregados ++;
+        })
+
+
+    }
+
+    public PararSons(){
+        this.topGear.stop();
     }
 
      //FUNÇÃO QUE CARREGA MODELOS 
@@ -550,11 +589,11 @@ export class HomePage {
 	public Update(): void{
 
 		requestAnimationFrame(() => {
-			this.Update();
+            this.Update();
 		});
-	  
+                
 		this.renderer.render( this.scene, this.camera );
-		
+    
 		this.plt.ready().then( ()=>{
             // Funções no jogo
             if(this.carregouPredios == true && 
@@ -562,7 +601,7 @@ export class HomePage {
                 this.carregouPessoas == true && 
                 this.carregouParadas == true && 
                 this.carregouRampas == true &&
-                this.carregouMusica == true &&
+                this.sonsCarregados == 7 &&
                 this.frst == true
             )
             {   
@@ -589,10 +628,10 @@ export class HomePage {
             }     
             this.DeltaTimer();
 		});
-        
-        //console.log(this.DeltaTime());
+
         this.time = new Date;//
         this.lastFrameTime = this.time.getTime();
+        
     }
 
     // Função que retorna velocidade do mundo - Ou seja a velociade do Veiculo/Jogador
@@ -628,7 +667,7 @@ export class HomePage {
             this.carrosDireita[i].position.z += this.VelocidadeMundo() - this.velCarrosDireita * 0.02;
 
             // Faz o respawn
-            if(this.carrosDireita[i].position.z >= 1)
+            if(this.carrosDireita[i].position.z >= 3)
             {
                 this.carrosDireita[i].position.x = pos;
                 this.carrosDireita[i].position.z = -20 - delay;
@@ -641,12 +680,15 @@ export class HomePage {
                 if(this.atualPessoas != 0)
                 {
                     // Perder pessoas
+                    this.som_grito.play();
                     this.atualPessoas--;
                     this.nPessoasPerdidas++;
                 }
                 this.carrosDireita[i].position.x = pos;
                 this.carrosDireita[i].position.z = -20 - delay;
                 this.nBatidas++;
+                this.som_batida.play();
+                this.som_buzina.play();
                 this.imortal = true;
             }
 
@@ -686,7 +728,7 @@ export class HomePage {
             this.carrosEsquerda[i].position.z += this.VelocidadeMundo() - this.velCarrosEsquerda * -0.02;
 
             // Faz o respawn
-            if(this.carrosEsquerda[i].position.z >= 1)
+            if(this.carrosEsquerda[i].position.z >= 3)
             {
                 this.carrosEsquerda[i].position.x = pos;
                 this.carrosEsquerda[i].position.z = -20 - delay;
@@ -699,11 +741,14 @@ export class HomePage {
                 if(this.atualPessoas != 0)
                 {
                     // Perder pessoas
+                    this.som_grito.play();
                     this.atualPessoas--;
                     this.nPessoasPerdidas++;
                 }
                 this.carrosEsquerda[i].position.x = pos;
                 this.carrosEsquerda[i].position.z = -20 - delay;
+                this.som_batida.play();
+                this.som_buzina.play();
                 this.nBatidas++;
                 this.imortal = true;
             }
@@ -765,6 +810,7 @@ export class HomePage {
                 this.parada.position.z = -30 - delay * 2;
 
                 // Descarregar pessoas
+                this.som_entrega.play();
                 this.nPessoasEntregues += this.atualPessoas;
                 this.tempoAux += this.atualPessoas * this.bonusTimer;
                 this.atualPessoas = 0;
@@ -809,7 +855,7 @@ export class HomePage {
                     lado = Math.floor(Math.random() * 2);
                     let delay = Math.floor(Math.random() * (this.delayMax - this.delayMin + 1) ) + this.delayMin;
                     this.pessoas[i].position.z = -30 - delay;
-    
+                    this.som_PegouPassageiro.play();
                     this.atualPessoas++;
                 }
             }
@@ -1198,6 +1244,7 @@ export class HomePage {
         // Esta freiando
         if(this.freio)
         {
+            this.som_freio.play();
             if(this.velocidadeFrente > 5)
             {
                 // Vermelho, esta diminundo a velocidade

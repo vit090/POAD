@@ -10,4 +10,6 @@ export class ConfigsService {
   public isCar: boolean;
   public music: boolean;
   public sound: boolean;
+  public voltou: boolean;
+  public veiculo: string;
 }
