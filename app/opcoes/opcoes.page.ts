@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { ConfigsService } from './../services/configs.service';
 
 @Component({
   selector: 'app-opcoes',
@@ -7,9 +8,9 @@ import { Component, OnInit } from '@angular/core';
 })
 export class OpcoesPage implements OnInit {
 
-  constructor() { }
+  constructor(public configs: ConfigsService) { }
 
   ngOnInit() {
   }
-
 }
+ 

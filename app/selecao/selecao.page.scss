@@ -1,1 +1,37 @@
 //
+.BotaoEsquerdo
+{
+  height: 100%;
+  width: 50%;
+
+  position: fixed;
+}
+.BotaoCerto
+{
+  height: 100%;
+  width: 50%;
+
+  position: fixed;
+  left: 50%;
+}
+
+.Fundo
+{
+  position: fixed;
+  height: 100%;
+  width: 100%;
+
+  background: url("../../assets/FundoEscolhas.png");
+  background-size: 100%, 100%;
+}
+
+.botaoVoltar
+{
+  width: 10%;
+  height: 20%;
+
+  position: fixed;
+
+  background: url("../../assets/BotaoVoltar.png");
+  background-size: 100%, 100%;
+}

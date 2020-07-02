@@ -11,8 +11,14 @@ export class SelecaoPage implements OnInit {
 
   constructor(private screenOrientation: ScreenOrientation, public configs: ConfigsService) { }
 
+
+
   ngOnInit() {
     this.screenOrientation.lock(this.screenOrientation.ORIENTATIONS.LANDSCAPE);
+    if(this.configs.voltou)
+    {
+      this.Recarregar();
+    }
   }
 
   public SelecionarCarro():void{
@@ -23,5 +29,13 @@ export class SelecaoPage implements OnInit {
   public SelecionarOnibus():void{
     this.configs.isCar = false;
     
+  }
+
+  // Recarregar a Cena
+  public Recarregar(): void{
+    if(this.configs.voltou)
+    {
+      location.reload();
+    }
   }
 }
