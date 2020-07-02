@@ -11,4 +11,5 @@ export class ConfigsService {
   public music: boolean;
   public sound: boolean;
   public voltou: boolean;
+  public veiculo: string;
 }

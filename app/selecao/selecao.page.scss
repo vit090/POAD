@@ -10,9 +10,19 @@
 {
   height: 100%;
   width: 50%;
-  background: red;
+
   position: fixed;
   left: 50%;
+}
+
+.Fundo
+{
+  position: fixed;
+  height: 100%;
+  width: 100%;
+
+  background: url("../../assets/FundoEscolhas.png");
+  background-size: 100%, 100%;
 }
 
 .botaoVoltar

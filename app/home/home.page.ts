@@ -40,6 +40,8 @@ export class HomePage {
     public tempoShow: number;
     //#endregion
 
+        
+
     //#region Configurações do Mundo
 	private scene:  THREE.Scene;
     private camera: THREE.PerspectiveCamera;
@@ -171,6 +173,7 @@ export class HomePage {
 
         // Orientação
         this.screenOrientation.lock(this.screenOrientation.ORIENTATIONS.LANDSCAPE);
+    
 
         this.CreatScene();
 
@@ -179,6 +182,7 @@ export class HomePage {
         console.log("IsCar: " + this.configs.isCar);
     }
     
+    // Cria a cena
     public CreatScene(): void{
         //#region Definição da Cena
         this.scene = new THREE.Scene();
@@ -192,7 +196,7 @@ export class HomePage {
         //#endregion
         
         //#region Definições do Timer
-        this.tempoShow = 200;
+        this.tempoShow = 20;
         this.bonusTimer = 10;
         this.tempo1 = 0;
         this.tempo2 = 0;
@@ -613,7 +617,6 @@ export class HomePage {
         })
 
         //#endregion
-
 
     }
 
