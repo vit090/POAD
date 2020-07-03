@@ -10,7 +10,7 @@
             Entregues: {{this.nPessoasEntregues}} | Perdidas: {{this.nPessoasPerdidas}} | Batidas: {{this.nBatidas}}
         </p>
         
-        <ion-back-button class="botaoVoltar" (click)="Voltar()" icon = null defaultHref="/selecao"></ion-back-button>
+        <ion-button class="botaoVoltar" (click)="Voltar()" fill=clear [routerLink]="'/selecao'"></ion-button>
     </div>
 
     <div class="contador">
@@ -33,7 +33,7 @@
             Entregues: {{this.nPessoasEntregues}} | Perdidas: {{this.nPessoasPerdidas}} | Batidas: {{this.nBatidas}}
         </p>
 
-        <ion-back-button class="botaoVoltar" (click)="Voltar()" icon = null defaultHref="/selecao"></ion-back-button>
+        <ion-button class="botaoVoltar" (click)="Voltar()" fill=clear [routerLink]="'/selecao'"></ion-button>
     </div>
 
     <div class="infos">

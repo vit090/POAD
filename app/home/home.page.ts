@@ -172,8 +172,8 @@ export class HomePage {
         this.startTime = this.time.getTime();
 
         // Orientação
-        this.screenOrientation.lock(this.screenOrientation.ORIENTATIONS.LANDSCAPE);
-    
+        //this.screenOrientation.lock(this.screenOrientation.ORIENTATIONS.LANDSCAPE);
+        this.screenOrientation.lock('landscape-primary');//
 
         this.CreatScene();
 

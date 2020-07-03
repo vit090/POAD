@@ -45,7 +45,23 @@ export class EstiloBasicoPage implements OnInit {
 
   public AoCarregar(): void
   {
-
+    // Configurações Se for carro
+    if(this.configsService.isCar)
+    {
+      // Maximo de skins do tipo
+      this.nMaxVeiculos = 4;
+      // Definição padrao
+      this.configsService.veiculo = "Carro_1"
+      this.imagemShow.style.background = "url('../../assets/img_Veiculos/img_Carro_1.png')"
+    }
+    else // Configurações se for Onibus
+    {
+      // Maximo de skins do tipo
+      this.nMaxVeiculos = 4;
+      // Definição padrao
+      this.configsService.veiculo = "Onibus_1"
+      this.imagemShow.style.background = "url('../../assets/img_Veiculos/img_Onibus_1.png')"
+    }
   }
 
   public MoverDireita(): void
@@ -83,7 +99,7 @@ export class EstiloBasicoPage implements OnInit {
     this.imagemShow.style.background = "url('../../assets/img_Veiculos/img_" + this.configsService.veiculo + ".png')";
   }
 
-  public Escolhher(): void
+  public Escolher(): void
   {
 
   }
