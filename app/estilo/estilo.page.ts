@@ -17,7 +17,7 @@ export class EstiloPage implements OnInit {
   private loader: GLTFLoader;
   private scene: THREE.Scene;
   private camera: THREE.PerspectiveCamera;
-  private renderer: THREE.WebGLRenderer;
+  private rendererr: THREE.WebGLRenderer;
   //Luzes
   private p_light: THREE.PointLight;
   private a_light: THREE.AmbientLight;
@@ -38,6 +38,9 @@ export class EstiloPage implements OnInit {
 
   //Variável de seleção
   private indiceSeleção: number;  
+
+  private rodando;
+
   ngOnInit() {
     // Orientação
     this.screenOrientation.lock(this.screenOrientation.ORIENTATIONS.LANDSCAPE);
@@ -46,13 +49,19 @@ export class EstiloPage implements OnInit {
       this.configsService.isCar = true;
     }
 
-    this.CreateScene();
+    if(this.configsService.voltou)
+    {
+      this.Recarregar();
+    }
+
+    this.CreateScene1();
 
     this.Update();
   }
 
-  CreateScene() {
+  CreateScene1() {
             
+
     console.log("CreateScene");
 
     // Definição da Cena
@@ -70,14 +79,15 @@ export class EstiloPage implements OnInit {
     this.camera.position.y = 4;
     this.camera.lookAt(0, 0, -5);
     //Renderer
-    this.renderer = new THREE.WebGLRenderer({ antialias: true});
-		this.renderer.setSize( window.innerWidth, window.innerHeight );
-		this.renderer.setClearColor('#c2d9ff');
-    document.body.appendChild( this.renderer.domElement );
+    this.rendererr = new THREE.WebGLRenderer({ antialias: true});
+		this.rendererr.setSize( window.innerWidth, window.innerHeight );
+    this.rendererr.setClearColor('#303030');
+  
+    document.body.appendChild( this.rendererr.domElement );
 
     // Atualização do tamanha da janela
     window.addEventListener('resize',() => {
-			this.renderer.setSize( window.innerWidth, window.innerHeight );
+			this.rendererr.setSize( window.innerWidth, window.innerHeight );
 			this.camera.aspect = window.innerWidth/ window.innerHeight;
 			this.camera.updateProjectionMatrix();
     })
@@ -120,7 +130,7 @@ export class EstiloPage implements OnInit {
       }
     }
 
-    //CARREGA OS ONIBUS
+    // Carregar os Onibus
     else if(!this.configsService.isCar){
       let pos = 0;
       for(let tipo: number = 0; tipo < this.numeroOnibus; tipo ++){
@@ -172,6 +182,7 @@ export class EstiloPage implements OnInit {
         }
         this.indiceSeleção --;
       }
+      this.rendererr.clear();
     }
 
     else if(!this.configsService.isCar){
@@ -183,6 +194,7 @@ export class EstiloPage implements OnInit {
         this.indiceSeleção --;
       }
     }
+
   }
 
   public Escolher(){
@@ -194,15 +206,26 @@ export class EstiloPage implements OnInit {
     }
     console.log("Entrou");
     this.scene.dispose();
-    this.renderer.dispose();
+    this.rendererr.dispose();
+    while(this.scene.children.length > 0){ 
+      this.scene.remove(this.scene.children[0]); 
+    }
+    this.rendererr.clear();
+    this.rendererr.resetGLState();
+    this.rendererr.setClearAlpha(1);
+    this.rendererr = null;
+    this.camera = null;
+
+    
   }
 
   public Update(){
+    
     requestAnimationFrame(() => {
       this.Update();
     });
           
-    this.renderer.render( this.scene, this.camera );
+    this.rendererr.render( this.scene, this.camera );
 
     //se carregous os carros rotaciona eles
     if(this.configsService.isCar){
@@ -212,12 +235,19 @@ export class EstiloPage implements OnInit {
     }
 
     //se carregous os onibus rotaciona eles
-    else if(!this.configsService.isCar){}
-      else if(this.carregouOnibus){
-        this.listaOnibus[this.indiceSeleção].rotateY(0.05);
-      }
+    else if(!this.configsService.isCar){
+
+    }
+    else if(this.carregouOnibus){
+      this.listaOnibus[this.indiceSeleção].rotateY(0.05);
     }
 
+    if(this.indiceSeleção == 2)
+    {
+      
+    }
+
+  }
 
   public LoadObj(caminho: string, callback){
 
@@ -243,4 +273,17 @@ export class EstiloPage implements OnInit {
     }   
   }
 
+  // Recarregar a Cena
+  public Recarregar(): void{
+    if(this.configsService.voltou)
+    {
+      location.reload();
+    }
+  }
+
+  // Função obrigatoria para voltar
+  public Voltar(): void
+  {
+      this.configsService.voltou = true;
+  }
 }

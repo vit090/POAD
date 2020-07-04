@@ -38,7 +38,7 @@
   height: 100%;
   width: 100%;
 
-  background: url("../../assets/Logo.png") center;
+  background: url("../../assets/logo.png") center;
   background-size: 60%, 60%;
   background-repeat: no-repeat;
 }
@@ -65,6 +65,7 @@
   text-align-last: center;
   padding-top: 2.5%;
   background: url("../../assets/BotaoVazio.png");
+  background-repeat:no-repeat;
   background-size: 100%, 100%;
 }
 
@@ -75,6 +76,7 @@
   height: 20%;
   //background-color: red;
   background: url('../../assets/BotaoPause.png');
+  background-repeat:no-repeat;
   background-size: 100%, 100%;
   margin: 0 auto;
   left: 90%;
@@ -85,6 +87,9 @@
 }
 #menuPause
 {
+  color: cyan;
+  text-align: center;
+
   pointer-events: none;
   visibility: hidden;
   height: 90%;
@@ -159,6 +164,20 @@
   background-color: rgb(255, 245, 110);
 }
 
+.botaoVoltar
+{
+  width: 15%;
+  height: 30%;
+
+
+  left: 42.5%;
+  position: fixed;
+
+  background: url("../../assets/BotaoVoltar.png");
+  background-repeat:no-repeat;
+  background-size: 100%, 100%;
+}
+
 .botaoAnormi
 {
   width: 10%;
@@ -169,6 +188,7 @@
   position: fixed;
 
   background: url("../../assets/BotaoVazio.png");
+  background-repeat:no-repeat;
   background-size: 100%, 100%;
 }
 .botaoNormi

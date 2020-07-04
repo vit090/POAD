@@ -27,6 +27,14 @@ const routes: Routes = [
     path: 'estilo',
     loadChildren: () => import('./estilo/estilo.module').then( m => m.EstiloPageModule)
   },
+  {
+    path: 'estilo-basico',
+    loadChildren: () => import('./estilo-basico/estilo-basico.module').then( m => m.EstiloBasicoPageModule)
+  },
+  {
+    path: 'creditos',
+    loadChildren: () => import('./creditos/creditos.module').then( m => m.CreditosPageModule)
+  },
 ];
 
 @NgModule({
