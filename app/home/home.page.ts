@@ -40,7 +40,15 @@ export class HomePage {
     public tempoShow: number;
     //#endregion
 
-        
+    // Dificuldade
+    private nivelDificuldade: number;
+    private modDifi: number;
+    private kmModDifi: number;
+    private nPesDif: number;
+    private nCarDirDif: number;
+    private nCarEsqDif: number;
+    private difLevMax: number;
+
 
     //#region Configurações do Mundo
 	private scene:  THREE.Scene;
@@ -196,7 +204,7 @@ export class HomePage {
         //#endregion
         
         //#region Definições do Timer
-        this.tempoShow = 20;
+        this.tempoShow = 200;
         this.bonusTimer = 10;
         this.tempo1 = 0;
         this.tempo2 = 0;
@@ -236,8 +244,8 @@ export class HomePage {
         this.velocidadeFrente = 50;
         this.freio = false;
         this.jogando = false;
-        this.quilometragem = 0;
-        this.quilometros = 0;
+        this.quilometragem = 90;
+        this.quilometros = 90;
         //#endregion  
         
         //#region Definições das pessoas
@@ -270,8 +278,8 @@ export class HomePage {
         //#region Outros Carros na Rua
         this.carrosDelayMax = 10
         this.carrosDelayMin = 2;
-        this.nCarrosDireita = 7;
-        this.nCarrosEsquerda = 4;
+        this.nCarrosDireita = 6;
+        this.nCarrosEsquerda = 6;
         this.velCarrosDireita = 1.2;
         this.velCarrosEsquerda = 1.5;
         this.posLugares = [-2.2, -1.1, 1.1, 2.2];
@@ -298,6 +306,19 @@ export class HomePage {
         
         //#region Mundo
         this.nFaixas = 11;
+        //#endregion
+
+        //#region Dificuldade
+
+        this.nivelDificuldade = 1;
+        this.kmModDifi = 300;
+        this.difLevMax = 5;
+        this.nPesDif = this.nPessoas;
+        this.nCarEsqDif = this.nCarrosEsquerda;
+        this.nCarDirDif = this.nCarrosDireita;
+        
+
+
         //#endregion
 
         // Testes
@@ -451,7 +472,7 @@ export class HomePage {
         this.carsCruGravi = [];
 
         //#region Carros da Direita
-        for(let j:number = 0; j < this.nCarrosDireita; j++)
+        for(let j:number = 0; j < this.nCarrosDireita + this.difLevMax; j++)
         {
             let pos = Math.floor(Math.random() * 2);
             if (pos == 1)
@@ -464,14 +485,14 @@ export class HomePage {
             }
             let obj:THREE.Mesh;
 
-            let tipo = Math.floor(Math.random() * 3 + 1);
+            let tipo = Math.floor(Math.random() * 4 + 1);
 
             this.carsVooando[j] = false;
             this.carsIgini[j] = false;
             this.carsTempIgini[j] = 20;
             this.carsCruGravi[j] = 0;
 
-			this.LoadObj("../../assets/Carro_" + tipo + ".glb", mesh =>{
+			this.LoadObj("../../assets/CGenerico_" + tipo + ".glb", mesh =>{
 			obj = mesh;
 			obj.position.x = pos;
             obj.position.z = -j * 4 * 1.5;
@@ -485,7 +506,7 @@ export class HomePage {
         //#endregion
 
         //#region Carros da Esquerda
-        for(let j:number = 0; j < this.nCarrosEsquerda; j++)
+        for(let j:number = 0; j < this.nCarrosEsquerda + this.difLevMax; j++)
         {
             let pos = Math.floor(Math.random() * 2);
             if (pos == 1)
@@ -503,9 +524,9 @@ export class HomePage {
             this.carsTempIgini[j + this.nCarrosEsquerda] = 20;
             this.carsCruGravi[j + this.nCarrosEsquerda] = 0;
 
-            let tipo = Math.floor(Math.random() * 3 + 1);
+            let tipo = Math.floor(Math.random() * 4 + 1);
 
-			this.LoadObj("../../assets/Carro_" + tipo + ".glb", mesh =>{
+			this.LoadObj("../../assets/CGenerico_" + tipo + ".glb", mesh =>{
             obj = mesh;
             obj.position.x = pos;
             obj.position.z = -j * 4 * 1.5;
@@ -711,6 +732,7 @@ export class HomePage {
                 {
                     this.ControleFreio();
                 }
+                this.DifuculdadePorKm();
                 this.MoverFaixas();
                 this.MoverCenario();
                 this.MoverPessoas();
@@ -824,8 +846,11 @@ export class HomePage {
                 this.carsCruGravi = 0;
             }
 
-            //this.EstadoCars(this.carrosDireita[i], i);
-            
+            // Para aumentar a quantidade de carros
+            if(this.nCarDirDif > this.nCarrosDireita)
+            {
+                this.nCarrosDireita++;
+            }
         }
     }
 
@@ -876,6 +901,12 @@ export class HomePage {
                 this.nBatidas++;
                 this.imortal = true;
             }
+
+            // Para aumentar a quantidade de carros
+            if(this.nCarEsqDif > this.nCarrosEsquerda)
+            {
+                this.nCarrosEsquerda++;
+            }
         }
     }
 
@@ -894,7 +925,7 @@ export class HomePage {
             }
         }
 
-        this.quilometros += this.VelocidadeMundo();
+        this.quilometros += this.VelocidadeMundo() * 3;
         this.quilometragem = +Number(this.quilometros).toFixed(0);
     }
 
@@ -965,6 +996,7 @@ export class HomePage {
             // Saiu fora de camera
             if(this.pessoas[i].position.z >= 1.5)
             {
+
                 let lado;
                 lado = Math.floor(Math.random() * 2);
                 if(lado == 0)
@@ -979,6 +1011,14 @@ export class HomePage {
                 let delay = Math.floor(Math.random() * (this.delayMax - this.delayMin + 1) ) + this.delayMin;
 
                 this.pessoas[i].position.z = -30 - delay;
+
+                // Retirar pessoas da rua
+                if(this.nPesDif < this.nPessoas && i + 1 == this.nPessoas)
+                {
+                    this.pessoas[i].position.y = -30
+                    this.pessoas[i].pop;
+                    this.nPessoas--;
+                }
             }
 
             // Colisao com o passageiro
@@ -1455,14 +1495,14 @@ export class HomePage {
 
             this.scene = null;
             this.renderer = null;
-            let menuFim = document.getElementById("fimDeJogo")
+            let menuFim = document.getElementById("fimDeJogo");
             menuFim.style.visibility = "visible";
             menuFim.style.pointerEvents = "all";
     
-            let infoDir = document.getElementById("infosDireita")
+            let infoDir = document.getElementById("infosDireita");
             infoDir.style.visibility = "hidden";
     
-            let infoEsq = document.getElementById("infosEsquerda")
+            let infoEsq = document.getElementById("infosEsquerda");
             infoEsq.style.visibility = "hidden";
         }
     }
@@ -1482,5 +1522,20 @@ export class HomePage {
             location.reload();
         }
     }
-    
+
+    // Aumenta a dificuldade por Km
+    public DifuculdadePorKm(): void
+    {
+        // verfica se ja passou da quilometragem que muda a dificuldade
+        if(this.quilometros > this.kmModDifi * this.nivelDificuldade && this.nivelDificuldade < this.difLevMax)
+        {
+            this.nivelDificuldade++;
+            this.nPesDif--;
+            this.delayMax += this.nivelDificuldade;
+            this.delayMin += this.nivelDificuldade;
+            this.nCarDirDif++;
+            this.nCarEsqDif++;
+            
+        }
+    }
 }

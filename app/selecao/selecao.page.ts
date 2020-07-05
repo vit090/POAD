@@ -14,7 +14,7 @@ export class SelecaoPage implements OnInit {
 
 
   ngOnInit() {
-    this.screenOrientation.lock(this.screenOrientation.ORIENTATIONS.LANDSCAPE);
+    this.screenOrientation.lock('landscape-primary');
     if(this.configs.voltou)
     {
       this.Recarregar();

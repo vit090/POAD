@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { ScreenOrientation } from '@ionic-native/screen-orientation/ngx';
 
 @Component({
   selector: 'app-creditos',
@@ -7,9 +8,13 @@ import { Component, OnInit } from '@angular/core';
 })
 export class CreditosPage implements OnInit {
 
-  constructor() { }
+  constructor(private screenOrientation: ScreenOrientation) { }
 
+  
+
+  
   ngOnInit() {
+    this.screenOrientation.lock('landscape-primary');//
   }
 
 }

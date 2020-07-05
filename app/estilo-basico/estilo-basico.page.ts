@@ -22,6 +22,8 @@ export class EstiloBasicoPage implements OnInit {
 
     this.nVeiculo = 1;
 
+    this.screenOrientation.lock('landscape-primary');//
+    
     //this.configsService.isCar = true;
 
     // Configurações Se for carro
