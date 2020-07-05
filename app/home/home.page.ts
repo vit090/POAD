@@ -31,6 +31,9 @@ export class HomePage {
     private lastFrameTime: number;
     private currentFrameTime: number;
     private multFrame: number;
+    // Dia
+    private tempoDia: number;
+    private dia: boolean;
     // Timer
     private tempo1: number;
     private tempo2: number;
@@ -40,7 +43,7 @@ export class HomePage {
     public tempoShow: number;
     //#endregion
 
-    // Dificuldade
+    //#region Dificuldade
     private nivelDificuldade: number;
     private modDifi: number;
     private kmModDifi: number;
@@ -48,7 +51,7 @@ export class HomePage {
     private nCarDirDif: number;
     private nCarEsqDif: number;
     private difLevMax: number;
-
+    //#endregion
 
     //#region Configurações do Mundo
 	private scene:  THREE.Scene;
@@ -115,6 +118,8 @@ export class HomePage {
     private velOnibus: number;
     private maxCarro: number;
     private maxOnibus: number;
+    private modiColiZ: number;
+    private modiColiX: number;
     //#endregion
     
     //#region Outros Carros na Rua
@@ -204,7 +209,7 @@ export class HomePage {
         //#endregion
         
         //#region Definições do Timer
-        this.tempoShow = 200;
+        this.tempoShow = 20;
         this.bonusTimer = 10;
         this.tempo1 = 0;
         this.tempo2 = 0;
@@ -229,6 +234,8 @@ export class HomePage {
         //#endregion
               
         //#region Definições de Luzes
+        this.tempoDia = 0.5;
+        this.dia = true;
         this.a_light= new THREE.AmbientLight(0xffffff, 0.5);
 		this.scene.add(this.a_light);
 		this.p_light = new THREE.PointLight(0xffffff, 0.5);
@@ -244,8 +251,8 @@ export class HomePage {
         this.velocidadeFrente = 50;
         this.freio = false;
         this.jogando = false;
-        this.quilometragem = 90;
-        this.quilometros = 90;
+        this.quilometragem = 0;
+        this.quilometros = 0;
         //#endregion  
         
         //#region Definições das pessoas
@@ -331,6 +338,20 @@ export class HomePage {
         
         ///////////////////////////////////////////////////////////////////////////
 
+        //#region Vetores
+        // Outros Carros na Rua
+        this.carrosDireita = [];
+        this.carrosEsquerda = [];
+        this.carsIgini = [];
+        this.carsVooando = [];
+        this.carsTempIgini = [];
+        this.carsCruGravi = [];
+
+        // Predios
+        this.predios = [];
+
+        //#endregion
+
         //#region Atualização do tamanha da janela
         window.addEventListener('resize',() => {
 			this.renderer.setSize( window.innerWidth, window.innerHeight );
@@ -339,7 +360,7 @@ export class HomePage {
         })
         //#endregion
 
-        //#region mundo
+        //#region Mundo
 
         // Base para cubos
     	let geometry = new THREE.BoxGeometry(4, 0.1, 30);
@@ -388,9 +409,6 @@ export class HomePage {
 
 
         //#endregion
-
-        //Predios
-        this.predios = [];
 
         //#region Predios da direita
         for(let i:number = 0; i<10; i++)
@@ -462,14 +480,6 @@ export class HomePage {
 			})
         }
         //#endregion
-
-        // Outros Carros na Rua
-        this.carrosDireita = [];
-        this.carrosEsquerda = [];
-        this.carsIgini = [];
-        this.carsVooando = [];
-        this.carsTempIgini = [];
-        this.carsCruGravi = [];
 
         //#region Carros da Direita
         for(let j:number = 0; j < this.nCarrosDireita + this.difLevMax; j++)
@@ -558,7 +568,7 @@ export class HomePage {
         let rampa:THREE.Mesh;
         this.LoadObj("../../assets/Rampa.glb", mesh =>{
             this.rampa = mesh;
-            this.rampa.position.z = -6;
+            this.rampa.position.z = -40;
             this.rampa.position.y = 0;
             this.rampa.scale.set(0.3, 0.3, 0.3);
             this.scene.add(this.rampa);
@@ -583,10 +593,14 @@ export class HomePage {
             if(this.configs.isCar)
             {
                 this.jogador.scale.set(0.2, 0.2, 0.15);
+                this.modiColiX = 0;
+                this.modiColiZ = 0;
             }
             else
             {
-                this.jogador.scale.set(0.2, 0.2, 0.1);
+                this.jogador.scale.set(0.2, 0.2, 0.15);
+                this.modiColiX = 0;
+                this.modiColiZ = 0.35;
             }
 
 			this.carregouJogador = true;
@@ -732,6 +746,7 @@ export class HomePage {
                 {
                     this.ControleFreio();
                 }
+                //this.CicloDia();
                 this.DifuculdadePorKm();
                 this.MoverFaixas();
                 this.MoverCenario();
@@ -925,7 +940,7 @@ export class HomePage {
             }
         }
 
-        this.quilometros += this.VelocidadeMundo() * 3;
+        this.quilometros += this.VelocidadeMundo();
         this.quilometragem = +Number(this.quilometros).toFixed(0);
     }
 
@@ -1125,10 +1140,10 @@ export class HomePage {
     {
         if(!this.vooando)
         {
-            if(objeto.position.z <= ColZ &&
-                objeto.position.z >= -ColZ &&
-                this.jogador.position.x + ColX >= objeto.position.x &&
-                this.jogador.position.x - ColX <= objeto.position.x)
+            if(objeto.position.z <= ColZ + this.modiColiZ &&
+                objeto.position.z >= -ColZ - this.modiColiZ &&
+                this.jogador.position.x + ColX + this.modiColiX >= objeto.position.x &&
+                this.jogador.position.x - ColX - this.modiColiX <= objeto.position.x)
             {
                 //this.nBatidas++;
                 return true
@@ -1457,6 +1472,28 @@ export class HomePage {
         // Possiveis soluções
         // 1. Trocar para em vez de uma função de freio para duas
         
+    }
+
+    // Função para o dia e noite
+    public CicloDia(): void{
+        if(this.dia)
+        {
+            this.tempoDia -= 0.0001;
+            if(this.tempoDia <= 0.1)
+            {
+                this.dia = false;
+            }
+        }
+        else
+        {
+            this.tempoDia += 0.0001;
+            if(this.tempoDia >= 0.5)
+            {
+                this.dia = true;
+            }
+        }
+
+        this.a_light.intensity = this.tempoDia;
     }
 
     // Tela de loading o jogo - Tela de loading durante o carregamento
