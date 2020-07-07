@@ -11,6 +11,7 @@ import { AppRoutingModule } from './app-routing.module';
 
 import { DeviceMotion } from '@ionic-native/device-motion/ngx';
 import { ScreenOrientation } from '@ionic-native/screen-orientation/ngx';
+import { Vibration } from '@ionic-native/vibration/ngx';
 
 @NgModule({
   declarations: [AppComponent],
@@ -21,6 +22,7 @@ import { ScreenOrientation } from '@ionic-native/screen-orientation/ngx';
     SplashScreen,
     DeviceMotion,
     ScreenOrientation,
+    Vibration,
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy }
   ],
   bootstrap: [AppComponent]

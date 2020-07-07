@@ -1,0 +1,43 @@
+#Esquerda{
+    position: fixed;
+    left: 2%;
+    top: 50%;
+    width: 15%;
+    height: 30%;
+
+    background: url("../../assets/BotaoEsquerdo.png");
+    background-size: 100% 100%;
+}
+
+#Direita{
+    position: fixed;
+    right: 2%;
+    top: 50%;
+    width: 15%;
+    height: 30%;
+
+    background: url("../../assets/BotaoCerto.png");
+    background-size: 100% 100%;
+}
+
+#Escolher{
+    position: fixed;
+    right: 42%;
+    top: 68%;
+    width: 15%;
+    height: 30%;
+
+    background: url("../../assets/BotaoPlay.png");
+    background-size: 100% 100%;
+}
+
+.botaoVoltar
+{
+  width: 10%;
+  height: 20%;
+
+  position: fixed;
+
+  background: url("../../assets/BotaoVoltar.png");
+  background-size: 100%, 100%;
+}

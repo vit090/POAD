@@ -1,0 +1,11 @@
+<div id="Fundo"></div>
+
+<img id="Exibicao" src={{this.configsService.gifLoc}} style="size: 10%, 10%;">
+
+<div id="Esquerda" (pointerdown)="MoverEsquerda()"></div>
+
+<div id="Escolher" (pointerdown)="Escolher()" [routerLink]="'/home'"></div>
+
+<div id="Direita" (pointerdown)="MoverDireita()"></div>
+
+<ion-back-button class="botaoVoltar" icon = null defaultHref="/selecao"></ion-back-button>

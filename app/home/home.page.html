@@ -1,34 +1,53 @@
-<div class="cheio">
+<div class="cheio" onload="Recarregar()">
+    <!-- Menu de Pause -->
     <div id="menuPause">
-        <p>Debug</p>
+        <p>'</p>
+        <p>Dificuldade: {{this.quilometragem}} > {{this.kmModDifi * this.nivelDificuldade}} | {{this.nPessoas}}</p>
+        <p>{{this.nPesDif}} < {{this.nPessoas}}</p>
+        <p>{{this.nCarEsqDif}} > {{this.nCarrosEsquerda}} | {{this.nCarDirDif}} > {{this.nCarrosDireita}}</p>
         <p>
-            <!--|Jogador| X: {{this.jogador.position.x}}, Z: {{this.jogador.position.z}}-->
+            | Pessoas e Batidas |
         </p>
         <p>
-            |Parada| X:{{this.parada.position.x}}, Z: {{this.parada.position.z}}
+            Entregues: {{this.nPessoasEntregues}} | Perdidas: {{this.nPessoasPerdidas}} | Batidas: {{this.nBatidas}}
         </p>
-        <p>
-            |Numero de Batidas| Total: {{this.nBatidas}}
-        </p>
-        <p>
-            {{this.vooando}}
-        </p>
+        
+        <ion-button class="botaoVoltar" (click)="Voltar()" fill=clear [routerLink]="'/selecao'"></ion-button>
     </div>
 
     <div class="contador">
-        {{atualPessoas}}
+        {{this.tempoShow}}
     </div>
-    <div class="pause" (pointerdown)="Pausar()">
-        Pause
+
+    <div id="pause" (pointerdown)="Pausar()"></div>
+
+    <div id="telaLoading">
+        <div id=logo></div>
     </div>
+    <!-- Menu de Fim de Jogo -->
+    <div id="fimDeJogo">
+        <h1>Fim De Jogo</h1>
+        <p>(Tempo Esgotado)</p>
+        <p>
+            | Pessoas e Batidas |
+        </p>
+        <p>
+            Entregues: {{this.nPessoasEntregues}} | Perdidas: {{this.nPessoasPerdidas}} | Batidas: {{this.nBatidas}}
+        </p>
+
+        <ion-button class="botaoVoltar" (click)="Voltar()" fill=clear [routerLink]="'/selecao'"></ion-button>
+    </div>
+
     <div class="infos">
-        <div id="infosEsquerda">{{tempoShow}}</div>
+        <div id="infosEsquerda">{{this.atualPessoas}} / {{this.maxPessoas}}</div>
         <div id="infosDireita">{{quilometragem}}</div>
     </div>
-    <div class="cheio" (pointerdown)="Freio()">
-        <div class="cheio" (pointerup)="Freio()">
+    
+    <div class="cheio" fill=clear (pointerdown)="Freio()">
+        <div class="cheio" fill=clear (pointerup)="Freio()">
             <!--
             <div id="tela">
+                (pointerup)
                 <div id="TelaEsquerda"></div>
                 <div id="TelaDireita"></div>
             </div>
@@ -36,4 +55,5 @@
         </div>
      
     </div>
+
 </div>
